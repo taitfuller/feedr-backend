@@ -6,10 +6,11 @@ export const getTopics = async (from: Date, to: Date): Promise<ITopic[]> => {
   }).exec();
 
   return Topic.find({ _id: { $in: topicIds } })
+    .populate({ path: "reviews", perDocumentLimit: 3 })
     .lean()
     .exec();
 };
 
 export const getTopic = async (id: string): Promise<ITopic | null> => {
-  return Topic.findById(id).lean().exec();
+  return Topic.findById(id).populate("reviews").lean().exec();
 };

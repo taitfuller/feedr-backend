@@ -45,6 +45,14 @@ const mockReviews = [
     date: new Date(2021, 8, 17),
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
+  {
+    date: new Date(2021, 8, 11),
+    topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
+  },
+  {
+    date: new Date(2021, 8, 9),
+    topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
+  },
 ] as unknown as IReview[];
 
 const mockTopics = [
@@ -80,6 +88,17 @@ describe("services/topic.ts", () => {
       expect(topics[0].summary).toBe("A really cool day to have a birthday");
       expect(topics[1].summary).toBe("An awesome day to have a birthday");
     });
+
+    it("Populates up to 3 reviews for all topics within date range", async () => {
+      await reviewColl.insertMany(mockReviews);
+      await topicColl.insertMany(mockTopics);
+
+      const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16));
+
+      expect(topics).toHaveLength(2);
+      expect(topics[0].reviews).toHaveLength(3);
+      expect(topics[1].reviews).toHaveLength(1);
+    });
   });
 
   describe("getTopic()", () => {
@@ -91,6 +110,15 @@ describe("services/topic.ts", () => {
       expect(topic?.keywords).toEqual(["awesome", "birthday"]);
       expect(topic?.summary).toEqual("An awesome day to have a birthday");
       expect(topic?.category).toBe("INQUIRY");
+    });
+
+    it("Populated reviews for topic with specified id", async () => {
+      await reviewColl.insertMany(mockReviews);
+      await topicColl.insertMany(mockTopics);
+
+      const topic = await getTopic("613c4a58b9e08b7a26724f3b");
+
+      expect(topic?.reviews).toHaveLength(4);
     });
 
     it("Returns null if no topic found with specified id", async () => {
