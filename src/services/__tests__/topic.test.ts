@@ -9,6 +9,7 @@ beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__ + global.__MONGO_DB_NAME__, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
     autoIndex: false,
   });
   db = mongoose.connection.db;
@@ -74,8 +75,6 @@ describe("services/topic.ts", () => {
       await topicColl.insertMany(mockTopics);
 
       const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16));
-
-      console.log(topics);
 
       expect(topics).toHaveLength(2);
       expect(topics[0].summary).toBe("A really cool day to have a birthday");

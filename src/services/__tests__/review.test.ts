@@ -9,6 +9,7 @@ beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__ + global.__MONGO_DB_NAME__, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
     autoIndex: false,
   });
   db = mongoose.connection.db;
