@@ -113,6 +113,19 @@ describe("services/topic.ts", () => {
       expect(topics[0].reviews).toHaveLength(2);
       expect(topics[1].reviews).toHaveLength(1);
     });
+
+    it("Sorts populated reviews by date descending", async () => {
+      await reviewColl.insertMany(mockReviews);
+      await topicColl.insertMany(mockTopics);
+
+      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9));
+
+      expect(topics).toHaveLength(2);
+      expect(topics[0].reviews).toHaveLength(3);
+      expect(topics[0].reviews?.[0].date).toEqual(new Date(2021, 8, 17));
+      expect(topics[0].reviews?.[1].date).toEqual(new Date(2021, 8, 13));
+      expect(topics[0].reviews?.[2].date).toEqual(new Date(2021, 8, 11));
+    });
   });
 
   describe("getTopic()", () => {

@@ -9,6 +9,7 @@ export const getTopics = async (from: Date, to: Date): Promise<ITopic[]> => {
     .populate({
       path: "reviews",
       match: { date: { $gte: from, $lte: to } },
+      options: { sort: { date: -1 } },
       perDocumentLimit: 3,
     })
     .lean()
