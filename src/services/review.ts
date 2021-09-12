@@ -28,58 +28,80 @@ export const getReviewSummary = async (
   other: number;
   oldReviews: number;
   topics: number;
-  averageRating: number | undefined;
+  averageRating: number;
 }> => {
-  const newReviews = await Review.aggregate()
-    .match({ date: { $gte: from, $lte: to } })
-    .group({
-      _id: "$category",
-      count: { $sum: 1 },
-    })
-    .exec();
+  const getNewReviewsCounts = async (
+    from: Date,
+    to: Date
+  ): Promise<{
+    featureRequests: number;
+    bugReports: number;
+    other: number;
+  }> => {
+    const result = await Review.aggregate()
+      .match({ date: { $gte: from, $lte: to } })
+      .group({
+        _id: "$category",
+        count: { $sum: 1 },
+      })
+      .exec();
 
-  const newReviewsCounts = {
-    featureRequests: 0,
-    bugReports: 0,
-    other: 0,
+    const counts = {
+      featureRequests: 0,
+      bugReports: 0,
+      other: 0,
+    };
+    result.forEach((category: { _id: string; count: number }) => {
+      switch (category._id) {
+        case "PROBLEM":
+          counts.bugReports = category.count;
+          break;
+        case "INQUIRY":
+          counts.featureRequests = category.count;
+          break;
+        case "IRRELEVANT":
+          counts.other = category.count;
+          break;
+      }
+    });
+    return counts;
   };
-  newReviews.forEach((review: { _id: string; count: number }) => {
-    switch (review._id) {
-      case "PROBLEM":
-        newReviewsCounts.bugReports = review.count;
-        break;
-      case "INQUIRY":
-        newReviewsCounts.featureRequests = review.count;
-        break;
-      case "IRRELEVANT":
-        newReviewsCounts.other = review.count;
-        break;
-    }
-  });
 
-  const result = await Review.aggregate()
-    .match({ date: { $lt: from } })
-    .count("oldReviews")
-    .exec();
-  const oldReviews = result.length ? result[0]["oldReviews"] : 0;
+  const getOldReviewsCount = async (from: Date): Promise<number> => {
+    const result = await Review.aggregate()
+      .match({ date: { $lt: from } })
+      .count("oldReviews")
+      .exec();
+    return result.length ? result[0]["oldReviews"] : 0;
+  };
 
-  const topicsResult = await Review.aggregate()
-    .match({
-      date: { $gte: from, $lte: to },
-      topicId: { $exists: true },
-    })
-    .group({ _id: "$topicId" })
-    .count("topics")
-    .exec();
-  const topics = topicsResult.length ? topicsResult[0]["topics"] : 0;
+  const getTopicsCount = async (from: Date, to: Date): Promise<number> => {
+    const result = await Review.aggregate()
+      .match({
+        date: { $gte: from, $lte: to },
+        topicId: { $exists: true },
+      })
+      .group({ _id: "$topicId" })
+      .count("topics")
+      .exec();
+    return result.length ? result[0]["topics"] : 0;
+  };
 
-  const averageResult = await Review.aggregate()
-    .match({ date: { $gte: from, $lte: to } })
-    .group({ _id: null, averageRating: { $avg: "$rating" } })
-    .exec();
-  const averageRating = averageResult.length
-    ? averageResult[0]["averageRating"]
-    : 0;
+  const getAverageRating = async (from: Date, to: Date): Promise<number> => {
+    const result = await Review.aggregate()
+      .match({ date: { $gte: from, $lte: to } })
+      .group({ _id: null, averageRating: { $avg: "$rating" } })
+      .exec();
+    return result.length ? result[0]["averageRating"] : 0;
+  };
+
+  const [newReviewsCounts, oldReviews, topics, averageRating] =
+    await Promise.all([
+      getNewReviewsCounts(from, to),
+      getOldReviewsCount(from),
+      getTopicsCount(from, to),
+      getAverageRating(from, to),
+    ]);
 
   return {
     ...newReviewsCounts,
