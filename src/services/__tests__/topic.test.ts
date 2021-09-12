@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Collection, Db, ObjectId } from "mongodb";
 import { IReview, ITopic } from "../../models";
-import { getTopic, getTopics } from "../topic";
+import { getTopic, getTopics, getTopicSummary } from "../topic";
 
 let db: Db;
 
@@ -35,22 +35,27 @@ afterAll(async () => {
 const mockReviews = [
   {
     date: new Date(2021, 8, 13),
+    rating: 5,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
     date: new Date(2021, 8, 16),
+    rating: 1,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3c"),
   },
   {
     date: new Date(2021, 8, 17),
+    rating: 3,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
     date: new Date(2021, 8, 11),
+    rating: 4,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
     date: new Date(2021, 8, 9),
+    rating: 3,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
 ] as unknown as IReview[];
@@ -154,6 +159,28 @@ describe("services/topic.ts", () => {
       const topic = await getTopic("613c4a58b9e08b7a26724f3e");
 
       expect(topic).toBeNull();
+    });
+  });
+
+  describe("getTopicSummary()", () => {
+    it("Gets topic summary", async () => {
+      await reviewColl.insertMany(mockReviews);
+
+      const summary = await getTopicSummary(
+        new ObjectId("613c4a58b9e08b7a26724f3b")
+      );
+
+      expect(summary.reviewCount).toBe(4);
+      expect(summary.averageRating).toBe(3.75);
+    });
+
+    it("Returns zeros if no matching reviews", async () => {
+      const summary = await getTopicSummary(
+        new ObjectId("613c4a58b9e08b7a26724f3b")
+      );
+
+      expect(summary.reviewCount).toBe(0);
+      expect(summary.averageRating).toBe(0);
     });
   });
 });
