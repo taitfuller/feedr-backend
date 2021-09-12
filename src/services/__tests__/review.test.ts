@@ -1,7 +1,7 @@
 import { Collection, Db, ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import { IReview } from "../../models";
-import { removeTopic, setFlag } from "../review";
+import { getReviewSummary, removeTopic, setFlag } from "../review";
 
 let db: Db;
 
@@ -35,6 +35,7 @@ const mockReviews = [
     date: new Date(2021, 8, 13),
     platform: "iOS",
     category: "INQUIRY",
+    rating: 5,
     text: "A really cool day to have a birthday",
     flag: false,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
@@ -44,6 +45,7 @@ const mockReviews = [
     date: new Date(2021, 8, 16),
     platform: "Android",
     category: "INQUIRY",
+    rating: 3,
     text: "An awesome day to have a birthday",
     flag: true,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3c"),
@@ -53,9 +55,38 @@ const mockReviews = [
     date: new Date(2021, 8, 17),
     platform: "iOS",
     category: "PROBLEM",
+    rating: 4,
     text: "A terrible day to have a birthday",
     flag: false,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
+  },
+  {
+    _id: new ObjectId("613c4a59b9e08b7a26724f60"),
+    date: new Date(2021, 8, 14),
+    platform: "Android",
+    category: "IRRELEVANT",
+    rating: 1,
+    text: "An irrelevant day to have a birthday",
+    flag: false,
+  },
+  {
+    _id: new ObjectId("613c4a59b9e08b7a26724f61"),
+    date: new Date(2021, 7, 28),
+    platform: "iOS",
+    category: "PROBLEM",
+    rating: 2,
+    text: "An early day to have a birthday",
+    flag: false,
+    topicId: new ObjectId("613c4a58b9e08b7a26724f3d"),
+  },
+  {
+    _id: new ObjectId("613c4a59b9e08b7a26724f62"),
+    date: new Date(2021, 4, 28),
+    platform: "Android",
+    category: "IRRELEVANT",
+    rating: 3,
+    text: "An earlier day to have a birthday",
+    flag: false,
   },
 ] as unknown as IReview[];
 
@@ -100,7 +131,7 @@ describe("services/review.ts", () => {
     it("Returns null if no review found with specified id", async () => {
       await reviewColl.insertMany(mockReviews);
 
-      const review = await setFlag("613c4a59b9e08b7a26724f60");
+      const review = await setFlag("613c4a59b9e08b7a26724f63");
       expect(review).toBeNull();
     });
   });
@@ -121,8 +152,40 @@ describe("services/review.ts", () => {
     it("Returns null if no review found with specified id", async () => {
       await reviewColl.insertMany(mockReviews);
 
-      const review = await removeTopic("613c4a59b9e08b7a26724f60");
+      const review = await removeTopic("613c4a59b9e08b7a26724f63");
       expect(review).toBeNull();
+    });
+  });
+
+  describe("getReviewSummary()", () => {
+    it("Gets review summary", async () => {
+      await reviewColl.insertMany(mockReviews);
+
+      const summary = await getReviewSummary(
+        new Date(2021, 8),
+        new Date(2021, 9)
+      );
+
+      expect(summary.featureRequests).toBe(2);
+      expect(summary.bugReports).toBe(1);
+      expect(summary.other).toBe(1);
+      expect(summary.oldReviews).toBe(2);
+      expect(summary.topics).toBe(2);
+      expect(summary.averageRating).toBe(3.25);
+    });
+
+    it("Returns zeros if no matching reviews", async () => {
+      const summary = await getReviewSummary(
+        new Date(1970),
+        new Date(2021, 8, 11)
+      );
+
+      expect(summary.featureRequests).toBe(0);
+      expect(summary.bugReports).toBe(0);
+      expect(summary.other).toBe(0);
+      expect(summary.oldReviews).toBe(0);
+      expect(summary.topics).toBe(0);
+      expect(summary.averageRating).toBe(0);
     });
   });
 });
