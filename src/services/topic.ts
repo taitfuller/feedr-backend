@@ -6,7 +6,11 @@ export const getTopics = async (from: Date, to: Date): Promise<ITopic[]> => {
   }).exec();
 
   return Topic.find({ _id: { $in: topicIds } })
-    .populate({ path: "reviews", perDocumentLimit: 3 })
+    .populate({
+      path: "reviews",
+      match: { date: { $gte: from, $lte: to } },
+      perDocumentLimit: 3,
+    })
     .lean()
     .exec();
 };

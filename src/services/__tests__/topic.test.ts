@@ -89,7 +89,7 @@ describe("services/topic.ts", () => {
       expect(topics[1].summary).toBe("An awesome day to have a birthday");
     });
 
-    it("Populates up to 3 reviews for all topics within date range", async () => {
+    it("Populates up to 3 reviews for all topics", async () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
@@ -97,6 +97,20 @@ describe("services/topic.ts", () => {
 
       expect(topics).toHaveLength(2);
       expect(topics[0].reviews).toHaveLength(3);
+      expect(topics[1].reviews).toHaveLength(1);
+    });
+
+    it("Populates reviews within date range", async () => {
+      await reviewColl.insertMany(mockReviews);
+      await topicColl.insertMany(mockTopics);
+
+      const topics = await getTopics(
+        new Date(2021, 8, 11),
+        new Date(2021, 8, 16)
+      );
+
+      expect(topics).toHaveLength(2);
+      expect(topics[0].reviews).toHaveLength(2);
       expect(topics[1].reviews).toHaveLength(1);
     });
   });
