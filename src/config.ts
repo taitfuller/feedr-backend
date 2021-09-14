@@ -16,7 +16,7 @@ const config = convict({
   },
   mongo_uri: {
     format: "String",
-    default: "mongodb://localhost:27017/st-marks-graveyard",
+    default: "mongodb://localhost:27017/feedr",
     env: "MONGO_URI",
   },
 });
