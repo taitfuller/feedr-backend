@@ -20,7 +20,6 @@ app.use("/api", routes);
 
 // Set default error handler
 app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
-  console.log(err.message);
   res.status(500).send("Server error");
   next();
 });

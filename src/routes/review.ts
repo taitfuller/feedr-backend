@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { setFlag } from "../services/review";
+import { removeTopic, setFlag } from "../services/review";
 import { isValidObjectId } from "mongoose";
 
 const router = Router();
@@ -23,7 +23,26 @@ router.patch("/:id/flag", async (req, res) => {
   try {
     review = await setFlag(id, flag);
   } catch (error) {
-    res.status(400).send("Validation Error");
+    res.status(400).send("Validation error");
+    return;
+  }
+
+  if (review) {
+    res.status(200).json(review);
+  } else {
+    res.status(404).send("Review not found");
+  }
+});
+
+router.patch("/:id/remove-topic", async (req, res, next) => {
+  const { id } = req.params;
+
+  let review;
+
+  try {
+    review = await removeTopic(id);
+  } catch (error) {
+    next(error);
     return;
   }
 
