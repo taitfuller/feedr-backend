@@ -20,3 +20,12 @@ export const removeTopic = jest.fn(() => ({
   text: "A really cool day to have a birthday",
   flag: false,
 }));
+
+export const getReviewSummary = jest.fn(() => ({
+  featureRequests: 13,
+  bugReports: 42,
+  other: 17,
+  oldReviews: 69,
+  topics: 7,
+  averageRating: 3.5,
+}));

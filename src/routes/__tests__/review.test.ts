@@ -1,11 +1,14 @@
 import request from "supertest";
 import app from "../../app";
-import { removeTopic, setFlag } from "../../services/review";
+import { getReviewSummary, removeTopic, setFlag } from "../../services/review";
 
 jest.mock("../../services/review");
 const mockedSetFlag = setFlag as jest.MockedFunction<typeof setFlag>;
 const mockedRemoveTopic = removeTopic as jest.MockedFunction<
   typeof removeTopic
+>;
+const mockedGetReviewSummary = getReviewSummary as jest.MockedFunction<
+  typeof getReviewSummary
 >;
 
 describe("routes/review.ts", () => {
@@ -121,5 +124,74 @@ describe("routes/review.ts", () => {
         "613c4a59b9e08b7a26724f57"
       );
     });
+  });
+
+  describe("GET /api/review/summary", () => {
+    it("Returns status 200 and summary", async () => {
+      await request(app)
+        .get("/api/review/summary?from=2021-08-01&to=2021-08-29")
+        .expect(200, {
+          featureRequests: 13,
+          bugReports: 42,
+          other: 17,
+          oldReviews: 69,
+          topics: 7,
+          averageRating: 3.5,
+        });
+
+      expect(mockedGetReviewSummary).toHaveBeenCalledTimes(1);
+      expect(mockedGetReviewSummary).toHaveBeenCalledWith(
+        new Date("2021-08-01"),
+        new Date("2021-08-29")
+      );
+    });
+
+    it("Returns status 400 if from has invalid format", async () => {
+      await request(app)
+        .get("/api/review/summary?from=invalid-date&to=2021-08-29")
+        .expect(400, "Invalid date format");
+
+      expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 400 if to has invalid format", async () => {
+      await request(app)
+        .get("/api/review/summary?from=2021-08-01&to=invalid_date")
+        .expect(400, "Invalid date format");
+
+      expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 400 if from and to has invalid format", async () => {
+      await request(app)
+        .get("/api/review/summary?from=invalid_date&to=invalid_date")
+        .expect(400, "Invalid date format");
+
+      expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  it("Returns status 400 if from is not provided", async () => {
+    await request(app)
+      .get("/api/review/summary?to=2021-08-29")
+      .expect(400, "`from` and `to` must be provided");
+
+    expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
+  });
+
+  it("Returns status 400 if to is not provided", async () => {
+    await request(app)
+      .get("/api/review/summary?from=2021-08-01")
+      .expect(400, "`from` and `to` must be provided");
+
+    expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
+  });
+
+  it("Returns status 400 if from and to are not provided", async () => {
+    await request(app)
+      .get("/api/review/summary")
+      .expect(400, "`from` and `to` must be provided");
+
+    expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
   });
 });

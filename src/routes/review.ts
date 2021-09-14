@@ -1,8 +1,31 @@
 import { Router } from "express";
-import { removeTopic, setFlag } from "../services/review";
+import { getReviewSummary, removeTopic, setFlag } from "../services/review";
 import { isValidObjectId } from "mongoose";
 
 const router = Router();
+
+router.get("/summary", async (req, res) => {
+  const { from, to } = req.query as { from: string; to: string };
+
+  if (!from || !to) {
+    res.status(400).send("`from` and `to` must be provided");
+    return;
+  }
+
+  const fromDate = new Date(from);
+  const toDate = new Date(to);
+  if (
+    fromDate.toString() === "Invalid Date" ||
+    toDate.toString() === "Invalid Date"
+  ) {
+    res.status(400).send("Invalid date format");
+    return;
+  }
+
+  const summary = await getReviewSummary(fromDate, toDate);
+
+  res.status(200).json(summary);
+});
 
 router.use("/:id", async (req, res, next) => {
   const { id } = req.params;

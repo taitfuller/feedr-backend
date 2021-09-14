@@ -21,7 +21,7 @@ export const getTopic = async (id: string): Promise<ITopic | null> => {
   return Topic.findById(id).populate("reviews").lean().exec();
 };
 
-type TopicSummary = {
+export type TopicSummary = {
   newReviews: number;
   oldReviews: number;
   averageRating: number;
