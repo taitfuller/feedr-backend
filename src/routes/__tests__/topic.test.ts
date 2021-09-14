@@ -1,10 +1,11 @@
 import request from "supertest";
 import app from "../../app";
-import { getSummaryByTopic, getTopics } from "../../services/topic";
+import { getSummaryByTopic, getTopic, getTopics } from "../../services/topic";
 
 jest.mock("../../services/topic");
 
 const mockedGetTopics = getTopics as jest.MockedFunction<typeof getTopics>;
+const mockedGetTopic = getTopic as jest.MockedFunction<typeof getTopic>;
 const mockedGetSummaryByTopic = getSummaryByTopic as jest.MockedFunction<
   typeof getSummaryByTopic
 >;
@@ -214,5 +215,62 @@ describe("routes/topic.ts", () => {
 
     expect(mockedGetTopics).toHaveBeenCalledTimes(0);
     expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+  });
+
+  describe("GET /api/topic/:id", () => {
+    it("Returns status 200 and topic", async () => {
+      await request(app)
+        .get("/api/topic/613c4a58b9e08b7a26724f3b")
+        .expect(200, {
+          _id: "613c4a58b9e08b7a26724f3b",
+          keywords: ["cool", "birthday"],
+          summary: "A really cool day to have a birthday",
+          category: "INQUIRY",
+          reviews: [
+            {
+              _id: "613c4a59b9e08b7a26724f57",
+              date: new Date(2021, 8, 13).toJSON(),
+              platform: "iOS",
+              category: "INQUIRY",
+              rating: 5,
+              text: "A really cool day to have a birthday",
+              flag: false,
+              topicId: "613c4a58b9e08b7a26724f3b",
+            },
+            {
+              _id: "613c4a59b9e08b7a26724f59",
+              date: new Date(2021, 8, 17).toJSON(),
+              platform: "iOS",
+              category: "PROBLEM",
+              rating: 4,
+              text: "A terrible day to have a birthday",
+              flag: false,
+              topicId: "613c4a58b9e08b7a26724f3b",
+            },
+          ],
+        });
+
+      expect(mockedGetTopic).toHaveBeenCalledTimes(1);
+      expect(mockedGetTopic).toHaveBeenCalledWith("613c4a58b9e08b7a26724f3b");
+    });
+
+    it("Returns status 400 if invalid id provided", async () => {
+      await request(app)
+        .get("/api/topic/invalid-id")
+        .expect(400, "Invalid ID format");
+
+      expect(mockedGetTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 404 if topic not found", async () => {
+      mockedGetTopic.mockResolvedValueOnce(null);
+
+      await request(app)
+        .get("/api/topic/613c4a58b9e08b7a26724f3b")
+        .expect(404, "Topic not found");
+
+      expect(mockedGetTopic).toHaveBeenCalledTimes(1);
+      expect(mockedGetTopic).toHaveBeenCalledWith("613c4a58b9e08b7a26724f3b");
+    });
   });
 });

@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { getSummaryByTopic, getTopics } from "../services/topic";
+import { getSummaryByTopic, getTopic, getTopics } from "../services/topic";
+import { isValidObjectId } from "mongoose";
 
 const router = Router();
 
@@ -35,6 +36,28 @@ router.get("/", async (req, res) => {
       },
     }))
   );
+});
+
+router.use("/:id", async (req, res, next) => {
+  const { id } = req.params;
+
+  if (isValidObjectId(id)) {
+    next();
+  } else {
+    res.status(400).send("Invalid ID format");
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const topic = await getTopic(id);
+
+  if (topic) {
+    res.status(200).json(topic);
+  } else {
+    res.status(404).send("Topic not found");
+  }
 });
 
 export default router;
