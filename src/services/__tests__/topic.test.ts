@@ -1,12 +1,7 @@
 import mongoose from "mongoose";
 import { Collection, Db, ObjectId } from "mongodb";
 import { IReview, ITopic } from "../../models";
-import {
-  getSummaryByTopic,
-  getTopic,
-  getTopics,
-  getTopicSummary,
-} from "../topic";
+import { getSummaryByTopic, getTopic, getTopics } from "../topic";
 
 let db: Db;
 
@@ -164,28 +159,6 @@ describe("services/topic.ts", () => {
       const topic = await getTopic("613c4a58b9e08b7a26724f3e");
 
       expect(topic).toBeNull();
-    });
-  });
-
-  describe("getTopicSummary()", () => {
-    it("Gets topic summary", async () => {
-      await reviewColl.insertMany(mockReviews);
-
-      const summary = await getTopicSummary(
-        new ObjectId("613c4a58b9e08b7a26724f3b")
-      );
-
-      expect(summary.reviewCount).toBe(4);
-      expect(summary.averageRating).toBe(3.75);
-    });
-
-    it("Returns zeros if no matching reviews", async () => {
-      const summary = await getTopicSummary(
-        new ObjectId("613c4a58b9e08b7a26724f3b")
-      );
-
-      expect(summary.reviewCount).toBe(0);
-      expect(summary.averageRating).toBe(0);
     });
   });
 

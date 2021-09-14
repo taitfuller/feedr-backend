@@ -21,33 +21,6 @@ export const getTopic = async (id: string): Promise<ITopic | null> => {
   return Topic.findById(id).populate("reviews").lean().exec();
 };
 
-export const getTopicSummary = async (
-  id: ObjectId
-): Promise<{ reviewCount: number; averageRating: number }> => {
-  const getReviewCount = async (id: ObjectId): Promise<number> => {
-    const result = await Review.aggregate()
-      .match({ topicId: id })
-      .count("reviewCount")
-      .exec();
-    return result.length ? result[0]["reviewCount"] : 0;
-  };
-
-  const getAverageRating = async (id: ObjectId): Promise<number> => {
-    const result = await Review.aggregate()
-      .match({ topicId: id })
-      .group({ _id: null, averageRating: { $avg: "$rating" } })
-      .exec();
-    return result.length ? result[0]["averageRating"] : 0;
-  };
-
-  const [reviewCount, averageRating] = await Promise.all([
-    getReviewCount(id),
-    getAverageRating(id),
-  ]);
-
-  return { reviewCount, averageRating };
-};
-
 type TopicSummary = {
   newReviews: number;
   oldReviews: number;
