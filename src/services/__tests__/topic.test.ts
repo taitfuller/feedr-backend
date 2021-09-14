@@ -1,7 +1,12 @@
 import mongoose from "mongoose";
 import { Collection, Db, ObjectId } from "mongodb";
 import { IReview, ITopic } from "../../models";
-import { getTopic, getTopics, getTopicSummary } from "../topic";
+import {
+  getSummaryByTopic,
+  getTopic,
+  getTopics,
+  getTopicSummary,
+} from "../topic";
 
 let db: Db;
 
@@ -181,6 +186,90 @@ describe("services/topic.ts", () => {
 
       expect(summary.reviewCount).toBe(0);
       expect(summary.averageRating).toBe(0);
+    });
+  });
+
+  describe("getSummaryByTopic()", () => {
+    it("Gets summaries by topic", async () => {
+      await reviewColl.insertMany(mockReviews);
+
+      const summaryByTopic = await getSummaryByTopic(
+        new Date(2021, 8, 10),
+        new Date(2021, 8, 16)
+      );
+
+      expect(summaryByTopic.size).toBe(2);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
+        2
+      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
+        1
+      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
+      ).toBe(4.5);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.newReviews).toBe(
+        1
+      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.oldReviews).toBe(
+        0
+      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.averageRating
+      ).toBe(1);
+    });
+
+    it("Returns empty map if no matching reviews", async () => {
+      const summaryByTopic = await getSummaryByTopic(
+        new Date(2021, 8),
+        new Date(2021, 9)
+      );
+
+      expect(summaryByTopic.size).toBe(0);
+    });
+
+    it("Returns zeros for no matching new reviews", async () => {
+      await reviewColl.insertOne({
+        date: new Date(2021, 7, 9),
+        rating: 3,
+        topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
+      } as unknown as IReview);
+
+      const summaryByTopic = await getSummaryByTopic(
+        new Date(2021, 8),
+        new Date(2021, 9)
+      );
+
+      expect(summaryByTopic.size).toBe(1);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
+        0
+      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
+        1
+      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
+      ).toBe(0);
+    });
+
+    it("Returns zero for no matching old reviews", async () => {
+      await reviewColl.insertOne(mockReviews[0]);
+
+      const summaryByTopic = await getSummaryByTopic(
+        new Date(2021, 8),
+        new Date(2021, 9)
+      );
+
+      expect(summaryByTopic.size).toBe(1);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
+        1
+      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
+        0
+      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
+      ).toBe(5);
     });
   });
 });
