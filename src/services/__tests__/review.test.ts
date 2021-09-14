@@ -104,6 +104,18 @@ describe("services/review.ts", () => {
       expect(reviews[2].flag).toBeFalsy();
     });
 
+    it("Sets flag to true if flag is undefined", async () => {
+      await reviewColl.insertMany(mockReviews);
+
+      const review = await setFlag("613c4a59b9e08b7a26724f57", undefined);
+      expect(review?.flag).toBeTruthy();
+
+      const reviews = await reviewColl.find().toArray();
+      expect(reviews[0].flag).toBeTruthy();
+      expect(reviews[1].flag).toBeTruthy();
+      expect(reviews[2].flag).toBeFalsy();
+    });
+
     it("Sets flag to true if flag is true", async () => {
       await reviewColl.insertMany(mockReviews);
 
