@@ -18,7 +18,7 @@ describe("routes/review.ts", () => {
         .patch("/api/review/613c4a59b9e08b7a26724f57/flag")
         .expect(200, {
           _id: "613c4a59b9e08b7a26724f57",
-          date: "2021-09-12T12:00:00.000Z",
+          date: new Date(2021, 8, 13).toJSON(),
           platform: "iOS",
           category: "INQUIRY",
           rating: 5,
@@ -77,7 +77,7 @@ describe("routes/review.ts", () => {
         .patch("/api/review/613c4a59b9e08b7a26724f57/remove-topic")
         .expect(200, {
           _id: "613c4a59b9e08b7a26724f57",
-          date: "2021-09-12T12:00:00.000Z",
+          date: new Date(2021, 8, 13).toJSON(),
           platform: "iOS",
           category: "INQUIRY",
           rating: 5,
