@@ -8,7 +8,7 @@ router.get("/summary", async (req, res) => {
   const { from, to } = req.query as { from: string; to: string };
 
   if (!from || !to) {
-    res.status(400).send("`from` and `to` must be provided");
+    res.status(400).send("`from` and `to` are required");
     return;
   }
 

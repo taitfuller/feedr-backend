@@ -174,7 +174,7 @@ describe("routes/review.ts", () => {
   it("Returns status 400 if from is not provided", async () => {
     await request(app)
       .get("/api/review/summary?to=2021-08-29")
-      .expect(400, "`from` and `to` must be provided");
+      .expect(400, "`from` and `to` are required");
 
     expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
   });
@@ -182,7 +182,7 @@ describe("routes/review.ts", () => {
   it("Returns status 400 if to is not provided", async () => {
     await request(app)
       .get("/api/review/summary?from=2021-08-01")
-      .expect(400, "`from` and `to` must be provided");
+      .expect(400, "`from` and `to` are required");
 
     expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
   });
@@ -190,7 +190,7 @@ describe("routes/review.ts", () => {
   it("Returns status 400 if from and to are not provided", async () => {
     await request(app)
       .get("/api/review/summary")
-      .expect(400, "`from` and `to` must be provided");
+      .expect(400, "`from` and `to` are required");
 
     expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
   });

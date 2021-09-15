@@ -1,7 +1,11 @@
-import { ITopic, Review, Topic } from "../models";
+import { IReview, ITopic, Review, Topic } from "../models";
 import { ObjectId } from "mongodb";
 
-export const getTopics = async (from: Date, to: Date): Promise<ITopic[]> => {
+export const getTopics = async (
+  from: Date,
+  to: Date,
+  platforms: IReview["platform"][]
+): Promise<ITopic[]> => {
   const topicIds = await Review.distinct("topicId", {
     date: { $gte: from, $lte: to },
   }).exec();
@@ -9,7 +13,7 @@ export const getTopics = async (from: Date, to: Date): Promise<ITopic[]> => {
   return Topic.find({ _id: { $in: topicIds } })
     .populate({
       path: "reviews",
-      match: { date: { $gte: from, $lte: to } },
+      match: { date: { $gte: from, $lte: to }, platform: { $in: platforms } },
       options: { sort: { date: -1 } },
       perDocumentLimit: 3,
     })
@@ -29,7 +33,8 @@ export type TopicSummary = {
 
 export const getSummaryByTopic = async (
   from: Date,
-  to: Date
+  to: Date,
+  platforms: string[]
 ): Promise<Map<string, TopicSummary>> => {
   const getNewReviews = async (
     from: Date,
@@ -40,6 +45,7 @@ export const getSummaryByTopic = async (
         .match({
           date: { $gte: from, $lte: to },
           topicId: { $exists: true },
+          platform: { $in: platforms },
         })
         .group({ _id: "$topicId", newReviews: { $sum: 1 } })
         .exec();
@@ -56,6 +62,7 @@ export const getSummaryByTopic = async (
         .match({
           date: { $lt: from },
           topicId: { $exists: true },
+          platform: { $in: platforms },
         })
         .group({ _id: "$topicId", oldReviews: { $sum: 1 } })
         .exec();
@@ -72,7 +79,11 @@ export const getSummaryByTopic = async (
   ): Promise<Map<string, number>> => {
     const result: { _id: ObjectId; averageRating: number }[] =
       await Review.aggregate()
-        .match({ date: { $gte: from, $lte: to }, topicId: { $exists: true } })
+        .match({
+          date: { $gte: from, $lte: to },
+          topicId: { $exists: true },
+          platform: { $in: platforms },
+        })
         .group({ _id: "$topicId", averageRating: { $avg: "$rating" } })
         .exec();
     return result.reduce(

@@ -14,7 +14,9 @@ describe("routes/topic.ts", () => {
   describe("GET /api/topic", () => {
     it("Returns status 200 and topics", async () => {
       await request(app)
-        .get("/api/topic?from=2021-08-01&to=2021-08-29")
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android"
+        )
         .expect(200, [
           {
             _id: "613c4a58b9e08b7a26724f3b",
@@ -77,12 +79,14 @@ describe("routes/topic.ts", () => {
       expect(mockedGetTopics).toHaveBeenCalledTimes(1);
       expect(mockedGetTopics).toHaveBeenCalledWith(
         new Date("2021-08-01"),
-        new Date("2021-08-29")
+        new Date("2021-08-29"),
+        ["iOS", "Android"]
       );
       expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(1);
       expect(mockedGetSummaryByTopic).toHaveBeenCalledWith(
         new Date("2021-08-01"),
-        new Date("2021-08-29")
+        new Date("2021-08-29"),
+        ["iOS", "Android"]
       );
     });
 
@@ -90,7 +94,9 @@ describe("routes/topic.ts", () => {
       mockedGetSummaryByTopic.mockResolvedValueOnce(new Map());
 
       await request(app)
-        .get("/api/topic?from=2021-08-01&to=2021-08-29")
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android"
+        )
         .expect(200, [
           {
             _id: "613c4a58b9e08b7a26724f3b",
@@ -153,18 +159,22 @@ describe("routes/topic.ts", () => {
       expect(mockedGetTopics).toHaveBeenCalledTimes(1);
       expect(mockedGetTopics).toHaveBeenCalledWith(
         new Date("2021-08-01"),
-        new Date("2021-08-29")
+        new Date("2021-08-29"),
+        ["iOS", "Android"]
       );
       expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(1);
       expect(mockedGetSummaryByTopic).toHaveBeenCalledWith(
         new Date("2021-08-01"),
-        new Date("2021-08-29")
+        new Date("2021-08-29"),
+        ["iOS", "Android"]
       );
     });
 
     it("Returns status 400 if from has invalid format", async () => {
       await request(app)
-        .get("/api/topic?from=invalid-date&to=2021-08-29")
+        .get(
+          "/api/topic?from=invalid-date&to=2021-08-29&platform=iOS&platform=Android"
+        )
         .expect(400, "Invalid date format");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -173,7 +183,9 @@ describe("routes/topic.ts", () => {
 
     it("Returns status 400 if to has invalid format", async () => {
       await request(app)
-        .get("/api/topic?from=2021-08-01&to=invalid_date")
+        .get(
+          "/api/topic?from=2021-08-01&to=invalid_date&platform=iOS&platform=Android"
+        )
         .expect(400, "Invalid date format");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -182,39 +194,70 @@ describe("routes/topic.ts", () => {
 
     it("Returns status 400 if from and to has invalid format", async () => {
       await request(app)
-        .get("/api/topic?from=invalid_date&to=invalid_date")
+        .get(
+          "/api/topic?from=invalid_date&to=invalid_date&platform=iOS&platform=Android"
+        )
         .expect(400, "Invalid date format");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
       expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
     });
-  });
 
-  it("Returns status 400 if from is not provided", async () => {
-    await request(app)
-      .get("/api/topic?to=2021-08-29")
-      .expect(400, "`from` and `to` must be provided");
+    it("Returns status 400 if from is not provided", async () => {
+      await request(app)
+        .get("/api/topic?to=2021-08-29&platform=iOS&platform=Android")
+        .expect(400, "`from` and `to` are required");
 
-    expect(mockedGetTopics).toHaveBeenCalledTimes(0);
-    expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
-  });
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
 
-  it("Returns status 400 if to is not provided", async () => {
-    await request(app)
-      .get("/api/topic?from=2021-08-01")
-      .expect(400, "`from` and `to` must be provided");
+    it("Returns status 400 if to is not provided", async () => {
+      await request(app)
+        .get("/api/topic?from=2021-08-01&platform=iOS&platform=Android")
+        .expect(400, "`from` and `to` are required");
 
-    expect(mockedGetTopics).toHaveBeenCalledTimes(0);
-    expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
-  });
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
 
-  it("Returns status 400 if from and to are not provided", async () => {
-    await request(app)
-      .get("/api/topic")
-      .expect(400, "`from` and `to` must be provided");
+    it("Returns status 400 if from and to are not provided", async () => {
+      await request(app)
+        .get("/api/topic?platform=iOS&platform=Android")
+        .expect(400, "`from` and `to` are required");
 
-    expect(mockedGetTopics).toHaveBeenCalledTimes(0);
-    expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 400 if platform is not provided", async () => {
+      await request(app)
+        .get("/api/topic?from=2021-08-01&to=2021-08-29")
+        .expect(400, "`platform` is required");
+
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 400 if platform is provided single invalid value", async () => {
+      await request(app)
+        .get("/api/topic?from=2021-08-01&to=2021-08-29&platform=ios")
+        .expect(400, "`platform` is invalid");
+
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 400 if platform is provided multiple invalid values", async () => {
+      await request(app)
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android"
+        )
+        .expect(400, "`platform` is invalid");
+
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe("GET /api/topic/:id", () => {

@@ -35,26 +35,31 @@ afterAll(async () => {
 const mockReviews = [
   {
     date: new Date(2021, 8, 13),
+    platform: "iOS",
     rating: 5,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
     date: new Date(2021, 8, 16),
+    platform: "Android",
     rating: 1,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3c"),
   },
   {
     date: new Date(2021, 8, 17),
+    platform: "iOS",
     rating: 3,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
     date: new Date(2021, 8, 11),
+    platform: "Android",
     rating: 4,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
     date: new Date(2021, 8, 9),
+    platform: "iOS",
     rating: 3,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
@@ -87,7 +92,10 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16));
+      const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16), [
+        "iOS",
+        "Android",
+      ]);
 
       expect(topics).toHaveLength(2);
       expect(topics[0].summary).toBe("A really cool day to have a birthday");
@@ -98,7 +106,10 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16));
+      const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16), [
+        "iOS",
+        "Android",
+      ]);
 
       expect(topics).toHaveLength(2);
       expect(topics[0].reviews).toHaveLength(3);
@@ -111,7 +122,8 @@ describe("services/topic.ts", () => {
 
       const topics = await getTopics(
         new Date(2021, 8, 11),
-        new Date(2021, 8, 16)
+        new Date(2021, 8, 16),
+        ["iOS", "Android"]
       );
 
       expect(topics).toHaveLength(2);
@@ -119,11 +131,40 @@ describe("services/topic.ts", () => {
       expect(topics[1].reviews).toHaveLength(1);
     });
 
+    it("Populates iOS reviews", async () => {
+      await reviewColl.insertMany(mockReviews);
+      await topicColl.insertMany(mockTopics);
+
+      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9), [
+        "iOS",
+      ]);
+
+      expect(topics).toHaveLength(2);
+      expect(topics[0].reviews).toHaveLength(3);
+      expect(topics[1].reviews).toHaveLength(0);
+    });
+
+    it("Populates Android reviews", async () => {
+      await reviewColl.insertMany(mockReviews);
+      await topicColl.insertMany(mockTopics);
+
+      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9), [
+        "Android",
+      ]);
+
+      expect(topics).toHaveLength(2);
+      expect(topics[0].reviews).toHaveLength(1);
+      expect(topics[1].reviews).toHaveLength(1);
+    });
+
     it("Sorts populated reviews by date descending", async () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9));
+      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9), [
+        "iOS",
+        "Android",
+      ]);
 
       expect(topics).toHaveLength(2);
       expect(topics[0].reviews).toHaveLength(3);
@@ -168,7 +209,8 @@ describe("services/topic.ts", () => {
 
       const summaryByTopic = await getSummaryByTopic(
         new Date(2021, 8, 10),
-        new Date(2021, 8, 16)
+        new Date(2021, 8, 16),
+        ["iOS", "Android"]
       );
 
       expect(summaryByTopic.size).toBe(2);
@@ -192,10 +234,63 @@ describe("services/topic.ts", () => {
       ).toBe(1);
     });
 
+    it("Gets summaries by topic for iOS", async () => {
+      await reviewColl.insertMany(mockReviews);
+
+      const summaryByTopic = await getSummaryByTopic(
+        new Date(2021, 8),
+        new Date(2021, 9),
+        ["iOS"]
+      );
+
+      expect(summaryByTopic.size).toBe(1);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
+        3
+      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
+        0
+      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
+      ).toBe(11 / 3);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")).toBeUndefined();
+    });
+
+    it("Gets summaries by topic for Android", async () => {
+      await reviewColl.insertMany(mockReviews);
+
+      const summaryByTopic = await getSummaryByTopic(
+        new Date(2021, 8),
+        new Date(2021, 9),
+        ["Android"]
+      );
+
+      expect(summaryByTopic.size).toBe(2);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
+        1
+      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
+        0
+      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
+      ).toBe(4);
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.newReviews).toBe(
+        1
+      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.oldReviews).toBe(
+        0
+      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.averageRating
+      ).toBe(1);
+    });
+
     it("Returns empty map if no matching reviews", async () => {
       const summaryByTopic = await getSummaryByTopic(
         new Date(2021, 8),
-        new Date(2021, 9)
+        new Date(2021, 9),
+        ["iOS", "Android"]
       );
 
       expect(summaryByTopic.size).toBe(0);
@@ -204,13 +299,15 @@ describe("services/topic.ts", () => {
     it("Returns zeros for no matching new reviews", async () => {
       await reviewColl.insertOne({
         date: new Date(2021, 7, 9),
+        platform: "iOS",
         rating: 3,
         topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
       } as unknown as IReview);
 
       const summaryByTopic = await getSummaryByTopic(
         new Date(2021, 8),
-        new Date(2021, 9)
+        new Date(2021, 9),
+        ["iOS", "Android"]
       );
 
       expect(summaryByTopic.size).toBe(1);
@@ -230,7 +327,8 @@ describe("services/topic.ts", () => {
 
       const summaryByTopic = await getSummaryByTopic(
         new Date(2021, 8),
-        new Date(2021, 9)
+        new Date(2021, 9),
+        ["iOS", "Android"]
       );
 
       expect(summaryByTopic.size).toBe(1);

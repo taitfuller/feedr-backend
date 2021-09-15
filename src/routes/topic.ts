@@ -5,10 +5,14 @@ import { isValidObjectId } from "mongoose";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const { from, to } = req.query as { from: string; to: string };
+  const { from, to, platform } = req.query as {
+    from: string;
+    to: string;
+    platform: string | string[];
+  };
 
   if (!from || !to) {
-    res.status(400).send("`from` and `to` must be provided");
+    res.status(400).send("`from` and `to` are required");
     return;
   }
 
@@ -22,9 +26,28 @@ router.get("/", async (req, res) => {
     return;
   }
 
-  const topics = await getTopics(fromDate, toDate);
+  if (!platform) {
+    res.status(400).send("`platform` is required");
+    return;
+  }
+  const platformArray = Array.isArray(platform) ? platform : [platform];
+  const validPlatforms = new Set(["iOS", "Android"]);
+  if (platformArray.some((platform) => !validPlatforms.has(platform))) {
+    res.status(400).send("`platform` is invalid");
+    return;
+  }
 
-  const summaryByTopic = await getSummaryByTopic(fromDate, toDate);
+  const topics = await getTopics(
+    fromDate,
+    toDate,
+    platformArray as ("iOS" | "Android")[]
+  );
+
+  const summaryByTopic = await getSummaryByTopic(
+    fromDate,
+    toDate,
+    platformArray
+  );
 
   res.status(200).json(
     topics.map((topic) => ({
