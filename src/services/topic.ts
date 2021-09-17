@@ -27,8 +27,8 @@ export const getTopic = async (id: string): Promise<ITopic | null> => {
 
 export type TopicSummary = {
   newReviews: number;
-  increase: number | undefined;
-  averageRating: number | undefined;
+  oldReviews: number;
+  averageRating: number;
 };
 
 export const getSummaryByTopic = async (
@@ -107,20 +107,13 @@ export const getSummaryByTopic = async (
     ...Array.from(averageByTopic.keys()),
   ]);
 
-  ids.forEach((id) => {
-    const newReviews = newByTopic.get(id) ?? 0;
-    const oldReviews = oldByTopic.get(id) ?? 0;
-
-    const increase = oldReviews
-      ? (newReviews + oldReviews) / oldReviews - 1
-      : undefined;
-
-    return summaryByTopic.set(id, {
-      newReviews: newReviews,
-      increase: increase,
-      averageRating: averageByTopic.get(id),
-    });
-  });
+  ids.forEach((id) =>
+    summaryByTopic.set(id, {
+      newReviews: newByTopic.get(id) || 0,
+      oldReviews: oldByTopic.get(id) || 0,
+      averageRating: averageByTopic.get(id) || 0,
+    })
+  );
 
   return summaryByTopic;
 };
