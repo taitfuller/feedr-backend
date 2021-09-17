@@ -53,13 +53,13 @@ export const getReviewSummary = async (
     };
     result.forEach((category: { _id: string; count: number }) => {
       switch (category._id) {
-        case "PROBLEM":
+        case "bugReport":
           counts.bugReports = category.count;
           break;
-        case "INQUIRY":
+        case "featureRequest":
           counts.featureRequests = category.count;
           break;
-        case "IRRELEVANT":
+        case "other":
           counts.other = category.count;
           break;
       }
