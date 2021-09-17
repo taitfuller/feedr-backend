@@ -25,7 +25,7 @@ describe("routes/topic.ts", () => {
             category: "featureRequest",
             counts: {
               newReviews: 1,
-              oldReviews: 1,
+              increase: 1,
               averageRating: 5,
             },
             reviews: [
@@ -58,7 +58,6 @@ describe("routes/topic.ts", () => {
             category: "featureRequest",
             counts: {
               newReviews: 1,
-              oldReviews: 0,
               averageRating: 3,
             },
             reviews: [
@@ -105,8 +104,6 @@ describe("routes/topic.ts", () => {
             category: "featureRequest",
             counts: {
               newReviews: 0,
-              oldReviews: 0,
-              averageRating: 0,
             },
             reviews: [
               {
@@ -138,8 +135,6 @@ describe("routes/topic.ts", () => {
             category: "featureRequest",
             counts: {
               newReviews: 0,
-              oldReviews: 0,
-              averageRating: 0,
             },
             reviews: [
               {

@@ -52,10 +52,10 @@ router.get("/", async (req, res) => {
   res.status(200).json(
     topics.map((topic) => ({
       ...topic,
-      counts: summaryByTopic.get(topic._id.toString()) || {
+      counts: summaryByTopic.get(topic._id.toString()) ?? {
         newReviews: 0,
-        oldReviews: 0,
-        averageRating: 0,
+        oldReviews: undefined,
+        averageRating: undefined,
       },
     }))
   );

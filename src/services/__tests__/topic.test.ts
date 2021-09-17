@@ -217,18 +217,16 @@ describe("services/topic.ts", () => {
       expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
         2
       );
-      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
-        1
-      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.increase).toBe(2);
       expect(
         summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
       ).toBe(4.5);
       expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.newReviews).toBe(
         1
       );
-      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.oldReviews).toBe(
-        0
-      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.increase
+      ).toBeUndefined();
       expect(
         summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.averageRating
       ).toBe(1);
@@ -247,9 +245,9 @@ describe("services/topic.ts", () => {
       expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
         3
       );
-      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
-        0
-      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.increase
+      ).toBeUndefined();
       expect(
         summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
       ).toBe(11 / 3);
@@ -269,18 +267,18 @@ describe("services/topic.ts", () => {
       expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
         1
       );
-      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
-        0
-      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.increase
+      ).toBeUndefined();
       expect(
         summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
       ).toBe(4);
       expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.newReviews).toBe(
         1
       );
-      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.oldReviews).toBe(
-        0
-      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.increase
+      ).toBeUndefined();
       expect(
         summaryByTopic.get("613c4a58b9e08b7a26724f3c")?.averageRating
       ).toBe(1);
@@ -314,12 +312,10 @@ describe("services/topic.ts", () => {
       expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
         0
       );
-      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
-        1
-      );
+      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.increase).toBe(0);
       expect(
         summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
-      ).toBe(0);
+      ).toBeUndefined();
     });
 
     it("Returns zero for no matching old reviews", async () => {
@@ -335,9 +331,9 @@ describe("services/topic.ts", () => {
       expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.newReviews).toBe(
         1
       );
-      expect(summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.oldReviews).toBe(
-        0
-      );
+      expect(
+        summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.increase
+      ).toBeUndefined();
       expect(
         summaryByTopic.get("613c4a58b9e08b7a26724f3b")?.averageRating
       ).toBe(5);

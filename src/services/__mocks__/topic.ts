@@ -86,7 +86,7 @@ export const getSummaryByTopic = jest.fn(
         "613c4a58b9e08b7a26724f3b",
         {
           newReviews: 1,
-          oldReviews: 1,
+          increase: 1,
           averageRating: 5,
         },
       ],
@@ -94,7 +94,7 @@ export const getSummaryByTopic = jest.fn(
         "613c4a58b9e08b7a26724f3c",
         {
           newReviews: 1,
-          oldReviews: 0,
+          increase: undefined,
           averageRating: 3,
         },
       ],
