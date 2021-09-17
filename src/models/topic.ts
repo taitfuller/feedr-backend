@@ -6,14 +6,14 @@ export interface ITopic {
   _id: ObjectId;
   keywords: string[];
   summary: string;
-  category: "bugReport" | "featureRequest";
+  type: "bugReport" | "featureRequest";
   reviews: IReview[];
 }
 
 const topicSchema = new Schema<ITopic, Model<ITopic>, ITopic>({
   keywords: [String],
   summary: { type: String, required: true },
-  category: {
+  type: {
     type: String,
     enum: ["bugReport", "featureRequest"],
     required: true,

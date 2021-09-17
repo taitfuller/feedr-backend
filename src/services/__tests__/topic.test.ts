@@ -70,19 +70,19 @@ const mockTopics = [
     _id: new ObjectId("613c4a58b9e08b7a26724f3b"),
     keywords: ["cool", "birthday"],
     summary: "A really cool day to have a birthday",
-    category: "featureRequest",
+    type: "featureRequest",
   },
   {
     _id: new ObjectId("613c4a58b9e08b7a26724f3c"),
     keywords: ["awesome", "birthday"],
     summary: "An awesome day to have a birthday",
-    category: "featureRequest",
+    type: "featureRequest",
   },
   {
     _id: new ObjectId("613c4a58b9e08b7a26724f3d"),
     keywords: ["terrible", "birthday"],
     summary: "A terrible day to have a birthday",
-    category: "bugReport",
+    type: "bugReport",
   },
 ] as ITopic[];
 
@@ -182,7 +182,7 @@ describe("services/topic.ts", () => {
 
       expect(topic?.keywords).toEqual(["awesome", "birthday"]);
       expect(topic?.summary).toEqual("An awesome day to have a birthday");
-      expect(topic?.category).toBe("featureRequest");
+      expect(topic?.type).toBe("featureRequest");
     });
 
     it("Populated reviews for topic with specified id", async () => {
