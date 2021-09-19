@@ -41,7 +41,7 @@ export const getReviewSummary = async (
     const result = await Review.aggregate()
       .match({ date: { $gte: from, $lte: to } })
       .group({
-        _id: "$category",
+        _id: "$type",
         count: { $sum: 1 },
       })
       .exec();
@@ -51,16 +51,16 @@ export const getReviewSummary = async (
       bugReports: 0,
       other: 0,
     };
-    result.forEach((category: { _id: string; count: number }) => {
-      switch (category._id) {
-        case "PROBLEM":
-          counts.bugReports = category.count;
+    result.forEach((type: { _id: string; count: number }) => {
+      switch (type._id) {
+        case "bugReport":
+          counts.bugReports = type.count;
           break;
-        case "INQUIRY":
-          counts.featureRequests = category.count;
+        case "featureRequest":
+          counts.featureRequests = type.count;
           break;
-        case "IRRELEVANT":
-          counts.other = category.count;
+        case "other":
+          counts.other = type.count;
           break;
       }
     });
