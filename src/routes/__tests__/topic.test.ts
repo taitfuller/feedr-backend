@@ -1,6 +1,8 @@
 import request from "supertest";
 import app from "../../app";
 import { getSummaryByTopic, getTopic, getTopics } from "../../services/topic";
+import jwt from "jsonwebtoken";
+import config from "../../config";
 
 jest.mock("../../services/topic");
 
@@ -10,6 +12,8 @@ const mockedGetSummaryByTopic = getSummaryByTopic as jest.MockedFunction<
   typeof getSummaryByTopic
 >;
 
+const token = jwt.sign({ sub: 1234 }, config.get("jwt_secret"));
+
 describe("routes/topic.ts", () => {
   describe("GET /api/topic", () => {
     it("Returns status 200 and topics", async () => {
@@ -17,6 +21,7 @@ describe("routes/topic.ts", () => {
         .get(
           "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android"
         )
+        .set("Authorization", `Bearer ${token}`)
         .expect(200, [
           {
             _id: "613c4a58b9e08b7a26724f3b",
@@ -97,6 +102,7 @@ describe("routes/topic.ts", () => {
         .get(
           "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android"
         )
+        .set("Authorization", `Bearer ${token}`)
         .expect(200, [
           {
             _id: "613c4a58b9e08b7a26724f3b",
@@ -175,6 +181,7 @@ describe("routes/topic.ts", () => {
         .get(
           "/api/topic?from=invalid-date&to=2021-08-29&platform=iOS&platform=Android"
         )
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -186,6 +193,7 @@ describe("routes/topic.ts", () => {
         .get(
           "/api/topic?from=2021-08-01&to=invalid_date&platform=iOS&platform=Android"
         )
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -197,6 +205,7 @@ describe("routes/topic.ts", () => {
         .get(
           "/api/topic?from=invalid_date&to=invalid_date&platform=iOS&platform=Android"
         )
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -206,6 +215,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if from is not provided", async () => {
       await request(app)
         .get("/api/topic?to=2021-08-29&platform=iOS&platform=Android")
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "`from` and `to` are required");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -215,6 +225,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if to is not provided", async () => {
       await request(app)
         .get("/api/topic?from=2021-08-01&platform=iOS&platform=Android")
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "`from` and `to` are required");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -224,6 +235,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if from and to are not provided", async () => {
       await request(app)
         .get("/api/topic?platform=iOS&platform=Android")
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "`from` and `to` are required");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -233,6 +245,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if platform is not provided", async () => {
       await request(app)
         .get("/api/topic?from=2021-08-01&to=2021-08-29")
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "`platform` is required");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -242,6 +255,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if platform is provided single invalid value", async () => {
       await request(app)
         .get("/api/topic?from=2021-08-01&to=2021-08-29&platform=ios")
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "`platform` is invalid");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
@@ -253,7 +267,31 @@ describe("routes/topic.ts", () => {
         .get(
           "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android"
         )
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "`platform` is invalid");
+
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 400 if no token provided", async () => {
+      await request(app)
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android"
+        )
+        .expect(401, "No authorization token was found");
+
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 400 if invalid token provided", async () => {
+      await request(app)
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android"
+        )
+        .set("Authorization", `Bearer let.me.in`)
+        .expect(401, "invalid token");
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(0);
       expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
@@ -264,6 +302,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 200 and topic", async () => {
       await request(app)
         .get("/api/topic/613c4a58b9e08b7a26724f3b")
+        .set("Authorization", `Bearer ${token}`)
         .expect(200, {
           _id: "613c4a58b9e08b7a26724f3b",
           keywords: ["cool", "birthday"],
@@ -300,7 +339,25 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if invalid id provided", async () => {
       await request(app)
         .get("/api/topic/invalid-id")
+        .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid ID format");
+
+      expect(mockedGetTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 401 if no token provided", async () => {
+      await request(app)
+        .get("/api/topic/613c4a58b9e08b7a26724f3b")
+        .expect(401, "No authorization token was found");
+
+      expect(mockedGetTopic).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 401 if invalid token provided", async () => {
+      await request(app)
+        .get("/api/topic/613c4a58b9e08b7a26724f3b")
+        .set("Authorization", `Bearer let.me.in`)
+        .expect(401, "invalid token");
 
       expect(mockedGetTopic).toHaveBeenCalledTimes(0);
     });
@@ -310,6 +367,7 @@ describe("routes/topic.ts", () => {
 
       await request(app)
         .get("/api/topic/613c4a58b9e08b7a26724f3b")
+        .set("Authorization", `Bearer ${token}`)
         .expect(404, "Topic not found");
 
       expect(mockedGetTopic).toHaveBeenCalledTimes(1);
