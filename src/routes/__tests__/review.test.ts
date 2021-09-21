@@ -13,7 +13,10 @@ const mockedGetReviewSummary = getReviewSummary as jest.MockedFunction<
   typeof getReviewSummary
 >;
 
-const token = jwt.sign({ sub: 1234 }, config.get("jwt_secret"));
+const token = jwt.sign(
+  { sub: "61495e3fb656d914455a2a38" },
+  config.get("jwt_secret")
+);
 
 describe("routes/review.ts", () => {
   describe("PATCH /api/review/:id/flag", () => {

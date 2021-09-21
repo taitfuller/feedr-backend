@@ -4,6 +4,7 @@ import auth from "./auth";
 import review from "./review";
 import topic from "./topic";
 import config from "../config";
+import user from "./user";
 
 const routes = Router();
 
@@ -18,5 +19,6 @@ routes.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
 
 routes.use("/review", review);
 routes.use("/topic", topic);
+routes.use("/user", user);
 
 export default routes;
