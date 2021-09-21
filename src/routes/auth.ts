@@ -1,8 +1,10 @@
 import { Router } from "express";
 import passport from "passport";
 import { Strategy as GitHubStrategy } from "passport-github";
+import jwt from "jsonwebtoken";
 import config from "../config";
 import { findAndUpdateOrCreateUser } from "../services/user";
+import { IUser } from "../models";
 
 const router = Router();
 
@@ -33,6 +35,13 @@ router.get(
   "/github/callback",
   passport.authenticate("github", { session: false }),
   (req, res) => {
+    res.cookie(
+      "token",
+      jwt.sign(
+        { sub: (req.user as IUser | undefined)?._id },
+        config.get("jwt_secret")
+      )
+    );
     res.redirect("/");
   }
 );

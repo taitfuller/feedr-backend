@@ -29,6 +29,11 @@ const config = convict({
     env: "GITHUB_CLIENT_SECRET",
     default: "",
   },
+  jwt_secret: {
+    format: "String",
+    env: "JWT_SECRET",
+    default: "",
+  },
 });
 config.validate({ allowed: "strict" });
 
