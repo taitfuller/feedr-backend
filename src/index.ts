@@ -5,6 +5,7 @@ import config from "./config";
 /* Start Server */
 mongoose
   .connect(config.get("mongo_uri"), {
+    useFindAndModify: false,
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

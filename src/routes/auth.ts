@@ -2,6 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import { Strategy as GitHubStrategy } from "passport-github";
 import config from "../config";
+import { findAndUpdateOrCreateUser } from "../services/user";
 
 const router = Router();
 
@@ -11,8 +12,17 @@ passport.use(
       clientID: config.get("github_client_id"),
       clientSecret: config.get("github_client_secret"),
     },
-    (accessToken, refreshToken, profile, cb) => {
-      cb(null, true);
+    async (accessToken, refreshToken, profile, cb) => {
+      try {
+        cb(
+          null,
+          await findAndUpdateOrCreateUser(+profile.id, {
+            displayName: profile.username ?? "",
+          })
+        );
+      } catch (err) {
+        cb(err);
+      }
     }
   )
 );
