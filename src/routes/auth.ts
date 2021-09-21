@@ -38,7 +38,7 @@ router.get(
     res.cookie(
       "token",
       jwt.sign(
-        { sub: (req.user as IUser | undefined)?._id },
+        { sub: (req.user as unknown as IUser | undefined)?._id },
         config.get("jwt_secret")
       )
     );
