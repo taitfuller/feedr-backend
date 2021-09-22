@@ -20,6 +20,7 @@ passport.use(
           null,
           await findAndUpdateOrCreateUser(+profile.id, {
             displayName: profile.username ?? "",
+            githubAccessToken: accessToken,
           })
         );
       } catch (err) {

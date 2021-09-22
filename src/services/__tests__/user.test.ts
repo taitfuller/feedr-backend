@@ -1,7 +1,10 @@
 import { Collection, Db, ObjectId } from "mongodb";
 import mongoose from "mongoose";
-import { findAndUpdateOrCreateUser, getUser } from "../user";
+import { encrypt, decrypt } from "mongoose-field-encryption";
+import { findAndUpdateOrCreateUser, getAccessToken, getUser } from "../user";
 import { IUser } from "../../models";
+import config from "../../config";
+import crypto from "crypto";
 
 let db: Db;
 
@@ -29,13 +32,25 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-const mockUsers = [
+const secret = crypto
+  .createHash("sha256")
+  .update(config.get("encryption_secret"))
+  .digest("hex")
+  .substring(0, 32);
+
+const mockUsers: (IUser & { __enc_githubAccessToken: boolean })[] = [
   {
     _id: new ObjectId("61495e3fb656d914455a2a38"),
     githubId: 123,
     displayName: "testuser",
+    githubAccessToken: encrypt(
+      "super-top-secret",
+      secret,
+      () => "JLKJn418bMJiBsw5"
+    ),
+    __enc_githubAccessToken: true,
   },
-] as IUser[];
+];
 
 describe("services/user.ts", () => {
   describe("findOrCreateUser()", () => {
@@ -44,17 +59,22 @@ describe("services/user.ts", () => {
 
       const user = await findAndUpdateOrCreateUser(123, {
         displayName: "usertest",
+        githubAccessToken: "new-super-top-secret",
       });
 
       expect(user?._id).toEqual(new ObjectId("61495e3fb656d914455a2a38"));
       expect(user?.githubId).toBe(123);
       expect(user?.displayName).toBe("usertest");
+      expect((user as IUser).githubAccessToken).toBeUndefined();
 
       const users = await userColl.find().toArray();
       expect(users).toHaveLength(1);
       expect(users[0]._id).toEqual(new ObjectId("61495e3fb656d914455a2a38"));
       expect(users[0].githubId).toBe(123);
       expect(users[0].displayName).toBe("usertest");
+      expect(decrypt(users[0].githubAccessToken, secret)).toBe(
+        "new-super-top-secret"
+      );
     });
 
     it("Returns a newly created user", async () => {
@@ -62,22 +82,30 @@ describe("services/user.ts", () => {
 
       const user = await findAndUpdateOrCreateUser(456, {
         displayName: "usertest",
+        githubAccessToken: "new-super-top-secret",
       });
 
       expect(user?._id).not.toEqual(new ObjectId("61495e3fb656d914455a2a38"));
       expect(user?.githubId).toBe(456);
       expect(user?.displayName).toBe("usertest");
+      expect((user as IUser).githubAccessToken).toBeUndefined();
 
       const users = await userColl.find().toArray();
       expect(users).toHaveLength(2);
       expect(users[0]._id).toEqual(new ObjectId("61495e3fb656d914455a2a38"));
       expect(users[0].githubId).toBe(123);
       expect(users[0].displayName).toBe("testuser");
+      expect(decrypt(users[0].githubAccessToken, secret)).toBe(
+        "super-top-secret"
+      );
       expect(users[1]._id).not.toEqual(
         new ObjectId("613c4a59b9e08b7a26724f57")
       );
       expect(users[1].githubId).toBe(456);
       expect(users[1].displayName).toBe("usertest");
+      expect(decrypt(users[1].githubAccessToken, secret)).toBe(
+        "new-super-top-secret"
+      );
     });
   });
 
@@ -90,6 +118,7 @@ describe("services/user.ts", () => {
       expect(user?._id).toEqual(new ObjectId("61495e3fb656d914455a2a38"));
       expect(user?.githubId).toBe(123);
       expect(user?.displayName).toBe("testuser");
+      expect(user?.githubAccessToken).toBeUndefined();
     });
 
     it("Returns null if user does not exist", async () => {
@@ -98,6 +127,24 @@ describe("services/user.ts", () => {
       const user = await getUser("61495e3fb656d914455a2a39");
 
       expect(user).toBeNull();
+    });
+  });
+
+  describe("getAccessToken()", () => {
+    it("Returns a users GitHub access token", async () => {
+      await userColl.insertMany(mockUsers);
+
+      const accessToken = await getAccessToken("61495e3fb656d914455a2a38");
+
+      expect(accessToken).toBe("super-top-secret");
+    });
+
+    it("Returns null if user does not exist", async () => {
+      await userColl.insertMany(mockUsers);
+
+      const accessToken = await getAccessToken("61495e3fb656d914455a2a39");
+
+      expect(accessToken).toBeNull();
     });
   });
 });

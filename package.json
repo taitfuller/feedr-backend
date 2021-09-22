@@ -10,7 +10,7 @@
     "format:fix": "prettier --write .",
     "lint": "eslint src/",
     "lint:fix": "npm run lint -- --fix",
-    "prepare": "cd .. && npm i && husky install"
+    "prepare": "husky install"
   },
   "dependencies": {
     "convict": "^5.2.1",
@@ -21,6 +21,7 @@
     "helmet": "^4.6.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.13.7",
+    "mongoose-field-encryption": "4.0.2",
     "passport": "^0.4.1",
     "passport-github": "^1.1.0"
   },
