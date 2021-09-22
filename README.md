@@ -10,6 +10,22 @@
 
 The following environment variables are available to configure this application:
 
+### Required
+
+### `GITHUB_CLIENT_ID`
+
+Client ID for [GitHub OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
+
+### `GITHUB_CLIENT_SECRET`
+
+Client Secret for [GitHub OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
+
+### `JWT_SECRET`
+
+Secret used for [signing JWTs](https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback)
+
+### Optional
+
 ### `PORT`
 
 > Default: `3001`

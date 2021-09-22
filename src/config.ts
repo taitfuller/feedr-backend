@@ -19,8 +19,22 @@ const config = convict({
     default: "mongodb://localhost:27017/feedr",
     env: "MONGO_URI",
   },
+  github_client_id: {
+    format: "String",
+    env: "GITHUB_CLIENT_ID",
+    default: "",
+  },
+  github_client_secret: {
+    format: "String",
+    env: "GITHUB_CLIENT_SECRET",
+    default: "",
+  },
+  jwt_secret: {
+    format: "String",
+    env: "JWT_SECRET",
+    default: "",
+  },
 });
-
 config.validate({ allowed: "strict" });
 
 export default config;
