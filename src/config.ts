@@ -34,6 +34,11 @@ const config = convict({
     env: "JWT_SECRET",
     default: "",
   },
+  encryption_secret: {
+    format: "String",
+    env: "ENCRYPTION_SECRET",
+    default: "",
+  },
 });
 config.validate({ allowed: "strict" });
 

@@ -5,3 +5,5 @@ export const getUser = jest.fn(() => ({
   githubId: 1234,
   displayName: "testuser",
 }));
+
+export const getAccessToken = jest.fn(() => "abc123");

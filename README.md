@@ -14,15 +14,19 @@ The following environment variables are available to configure this application:
 
 ### `GITHUB_CLIENT_ID`
 
-Client ID for [GitHub OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
+Client ID for [GitHub OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app).
 
 ### `GITHUB_CLIENT_SECRET`
 
-Client Secret for [GitHub OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
+Client Secret for [GitHub OAuth App](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app).
 
 ### `JWT_SECRET`
 
-Secret used for [signing JWTs](https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback)
+Secret used for [signing JWTs](https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback).
+
+### `ENCRYPTION_SECRET`
+
+Secret used for [encrypting mongoose fields](https://www.npmjs.com/package/mongoose-field-encryption).
 
 ### Optional
 
