@@ -13,6 +13,7 @@ passport.use(
     {
       clientID: config.get("github_client_id"),
       clientSecret: config.get("github_client_secret"),
+      scope: "repo",
     },
     async (accessToken, refreshToken, profile, cb) => {
       try {

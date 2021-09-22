@@ -25,6 +25,23 @@ describe("routes/user.ts", () => {
       expect(mockedGetUser).toHaveBeenCalledWith("1234");
     });
 
+    it("Returns status 401 if no token provided", async () => {
+      await request(app)
+        .get("/api/user")
+        .expect(401, "No authorization token was found");
+
+      expect(mockedGetUser).toHaveBeenCalledTimes(0);
+    });
+
+    it("Returns status 401 if invalid token provided", async () => {
+      await request(app)
+        .get("/api/user")
+        .set("Authorization", `Bearer let.me.in`)
+        .expect(401, "invalid token");
+
+      expect(mockedGetUser).toHaveBeenCalledTimes(0);
+    });
+
     it("Returns status 404 if user not found", async () => {
       mockedGetUser.mockResolvedValueOnce(null);
 

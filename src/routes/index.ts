@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import jwt, { UnauthorizedError } from "express-jwt";
 import auth from "./auth";
+import github from "./github";
 import review from "./review";
 import topic from "./topic";
 import config from "../config";
@@ -17,6 +18,7 @@ routes.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+routes.use("/github", github);
 routes.use("/review", review);
 routes.use("/topic", topic);
 routes.use("/user", user);
