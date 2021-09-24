@@ -1,7 +1,13 @@
 import { Router } from "express";
-import { createFeed } from "../services/feed";
+import { createFeed, getApps } from "../services/feed";
 
 const router = Router();
+
+router.get("/", async (req, res) => {
+  const apps = await getApps();
+
+  res.status(200).json(apps);
+});
 
 router.post("/", async (req, res) => {
   const { appName, repoName } = req.body;

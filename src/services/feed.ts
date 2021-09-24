@@ -21,6 +21,14 @@ interface IApp {
   otherReviews: IAppReview[];
 }
 
+export const getApps = async (): Promise<string[]> => {
+  const db = mongoose.connection.db;
+
+  const apps = await db.collection<IApp>("apps").find().toArray();
+
+  return apps.map((app) => app._id);
+};
+
 export const createFeed = async (
   appName: string,
   repoName: string,
