@@ -7,7 +7,7 @@ export const getRepositories = async (token: string): Promise<string[]> => {
       .set("Authorization", `token ${token}`)
       .set("User-Agent", "FEEDR")
       .send();
-    return response.body.map((repo: { name: string }) => repo.name);
+    return response.body.map((repo: { name: string }) => repo.name) ?? [];
   } catch (error) {
     return error.status;
   }

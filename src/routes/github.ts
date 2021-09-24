@@ -11,7 +11,6 @@ router.get("/repositories", async (req, res) => {
 
   const repositories = await getRepositories(token);
 
-  console.log(repositories);
   res.json(repositories);
 });
 

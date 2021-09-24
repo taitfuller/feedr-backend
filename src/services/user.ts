@@ -17,7 +17,10 @@ export const findAndUpdateOrCreateUser = async (
 };
 
 export const getUser = async (id: string): Promise<IUser | null> => {
-  return User.findById(id, "-githubAccessToken").lean().exec();
+  return User.findById(id, "-githubAccessToken")
+    .populate("feeds")
+    .lean()
+    .exec();
 };
 
 export const getAccessToken = async (id: string): Promise<string | null> => {
