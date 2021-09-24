@@ -21,7 +21,7 @@ export const removeTopic = async (id: string): Promise<IReview | null> => {
 };
 
 export const getReviewSummary = async (
-  feedId: string,
+  feed: string,
   from: Date,
   to: Date
 ): Promise<{
@@ -32,9 +32,9 @@ export const getReviewSummary = async (
   topics: number;
   averageRating: number;
 }> => {
-  feedId = new ObjectId(feedId);
+  const feedId = new ObjectId(feed);
   const getNewReviewsCounts = async (
-    feedId: string,
+    feedId: ObjectId,
     from: Date,
     to: Date
   ): Promise<{
@@ -72,7 +72,7 @@ export const getReviewSummary = async (
   };
 
   const getOldReviewsCount = async (
-    feedId: string,
+    feedId: ObjectId,
     from: Date
   ): Promise<number> => {
     const result = await Review.aggregate()
@@ -83,7 +83,7 @@ export const getReviewSummary = async (
   };
 
   const getTopicsCount = async (
-    feedId: string,
+    feedId: ObjectId,
     from: Date,
     to: Date
   ): Promise<number> => {
@@ -100,7 +100,7 @@ export const getReviewSummary = async (
   };
 
   const getAverageRating = async (
-    feedId: string,
+    feedId: ObjectId,
     from: Date,
     to: Date
   ): Promise<number> => {

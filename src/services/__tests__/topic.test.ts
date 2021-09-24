@@ -92,10 +92,12 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16), [
-        "iOS",
-        "Android",
-      ]);
+      const topics = await getTopics(
+        "",
+        new Date(2021, 8),
+        new Date(2021, 8, 16),
+        ["iOS", "Android"]
+      );
 
       expect(topics).toHaveLength(2);
       expect(topics[0].summary).toBe("A really cool day to have a birthday");
@@ -106,10 +108,12 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 8, 16), [
-        "iOS",
-        "Android",
-      ]);
+      const topics = await getTopics(
+        "",
+        new Date(2021, 8),
+        new Date(2021, 8, 16),
+        ["iOS", "Android"]
+      );
 
       expect(topics).toHaveLength(2);
       expect(topics[0].reviews).toHaveLength(3);
@@ -121,6 +125,7 @@ describe("services/topic.ts", () => {
       await topicColl.insertMany(mockTopics);
 
       const topics = await getTopics(
+        "",
         new Date(2021, 8, 11),
         new Date(2021, 8, 16),
         ["iOS", "Android"]
@@ -135,7 +140,7 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9), [
+      const topics = await getTopics("", new Date(2021, 8), new Date(2021, 9), [
         "iOS",
       ]);
 
@@ -148,7 +153,7 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9), [
+      const topics = await getTopics("", new Date(2021, 8), new Date(2021, 9), [
         "Android",
       ]);
 
@@ -161,7 +166,7 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics(new Date(2021, 8), new Date(2021, 9), [
+      const topics = await getTopics("", new Date(2021, 8), new Date(2021, 9), [
         "iOS",
         "Android",
       ]);

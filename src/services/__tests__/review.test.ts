@@ -174,6 +174,7 @@ describe("services/review.ts", () => {
       await reviewColl.insertMany(mockReviews);
 
       const summary = await getReviewSummary(
+        "",
         new Date(2021, 8),
         new Date(2021, 9)
       );
@@ -188,6 +189,7 @@ describe("services/review.ts", () => {
 
     it("Returns zeros if no matching reviews", async () => {
       const summary = await getReviewSummary(
+        "",
         new Date(1970),
         new Date(2021, 8, 11)
       );

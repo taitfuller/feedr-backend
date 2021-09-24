@@ -38,7 +38,7 @@ const secret = crypto
   .digest("hex")
   .substring(0, 32);
 
-const mockUsers: (IUser & { __enc_githubAccessToken: boolean })[] = [
+const mockUsers = [
   {
     _id: new ObjectId("61495e3fb656d914455a2a38"),
     githubId: 123,
@@ -50,7 +50,7 @@ const mockUsers: (IUser & { __enc_githubAccessToken: boolean })[] = [
     ),
     __enc_githubAccessToken: true,
   },
-];
+] as unknown[] as (IUser & { __enc_githubAccessToken: boolean })[];
 
 describe("services/user.ts", () => {
   describe("findOrCreateUser()", () => {

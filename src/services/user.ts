@@ -2,8 +2,8 @@ import { User, IUser } from "../models";
 
 export const findAndUpdateOrCreateUser = async (
   githubId: number,
-  doc: Omit<IUser, "_id" | "githubId">
-): Promise<Omit<IUser, "githubAccessToken feeds">> => {
+  doc: Omit<IUser, "_id" | "githubId" | "feeds">
+): Promise<Omit<IUser, "githubAccessToken" | "feeds">> => {
   const user =
     (await User.findOneAndUpdate({ githubId: githubId }, doc, {
       new: true,
