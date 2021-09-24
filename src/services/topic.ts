@@ -2,11 +2,13 @@ import { IReview, ITopic, Review, Topic } from "../models";
 import { ObjectId } from "mongodb";
 
 export const getTopics = async (
+  feedId: string,
   from: Date,
   to: Date,
   platforms: IReview["platform"][]
 ): Promise<ITopic[]> => {
   const topicIds = await Review.distinct("topicId", {
+    feed: feedId,
     date: { $gte: from, $lte: to },
   }).exec();
 
