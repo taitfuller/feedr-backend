@@ -5,7 +5,11 @@ import { isValidObjectId } from "mongoose";
 const router = Router();
 
 router.get("/summary", async (req, res) => {
-  const { from, to } = req.query as { from: string; to: string };
+  const { from, to, feed } = req.query as {
+    from: string;
+    to: string;
+    feed: string;
+  };
 
   if (!from || !to) {
     res.status(400).send("`from` and `to` are required");
@@ -22,7 +26,7 @@ router.get("/summary", async (req, res) => {
     return;
   }
 
-  const summary = await getReviewSummary(fromDate, toDate);
+  const summary = await getReviewSummary(feed, fromDate, toDate);
 
   res.status(200).json(summary);
 });

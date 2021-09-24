@@ -4,6 +4,7 @@ import { IReview } from "./";
 
 export interface ITopic {
   _id: ObjectId;
+  feed: ObjectId;
   keywords: string[];
   summary: string;
   type: "bugReport" | "featureRequest";
@@ -11,6 +12,7 @@ export interface ITopic {
 }
 
 const topicSchema = new Schema<ITopic, Model<ITopic>, ITopic>({
+  feed: { type: Schema.Types.ObjectId, ref: "Feed" },
   keywords: [String],
   summary: { type: String, required: true },
   type: {

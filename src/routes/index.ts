@@ -6,6 +6,7 @@ import review from "./review";
 import topic from "./topic";
 import config from "../config";
 import user from "./user";
+import feed from "./feed";
 
 const routes = Router();
 
@@ -18,6 +19,7 @@ routes.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+routes.use("/feed", feed);
 routes.use("/github", github);
 routes.use("/review", review);
 routes.use("/topic", topic);

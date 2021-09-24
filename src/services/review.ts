@@ -1,4 +1,5 @@
 import { IReview, Review } from "../models";
+import { ObjectId } from "mongodb";
 
 export const setFlag = async (
   id: string,
@@ -20,6 +21,7 @@ export const removeTopic = async (id: string): Promise<IReview | null> => {
 };
 
 export const getReviewSummary = async (
+  feedId: string,
   from: Date,
   to: Date
 ): Promise<{
@@ -30,7 +32,9 @@ export const getReviewSummary = async (
   topics: number;
   averageRating: number;
 }> => {
+  feedId = new ObjectId(feedId);
   const getNewReviewsCounts = async (
+    feedId: string,
     from: Date,
     to: Date
   ): Promise<{
@@ -39,7 +43,7 @@ export const getReviewSummary = async (
     other: number;
   }> => {
     const result = await Review.aggregate()
-      .match({ date: { $gte: from, $lte: to } })
+      .match({ feed: feedId, date: { $gte: from, $lte: to } })
       .group({
         _id: "$type",
         count: { $sum: 1 },
@@ -67,17 +71,25 @@ export const getReviewSummary = async (
     return counts;
   };
 
-  const getOldReviewsCount = async (from: Date): Promise<number> => {
+  const getOldReviewsCount = async (
+    feedId: string,
+    from: Date
+  ): Promise<number> => {
     const result = await Review.aggregate()
-      .match({ date: { $lt: from } })
+      .match({ feed: feedId, date: { $lt: from } })
       .count("oldReviews")
       .exec();
     return result.length ? result[0]["oldReviews"] : 0;
   };
 
-  const getTopicsCount = async (from: Date, to: Date): Promise<number> => {
+  const getTopicsCount = async (
+    feedId: string,
+    from: Date,
+    to: Date
+  ): Promise<number> => {
     const result = await Review.aggregate()
       .match({
+        feed: feedId,
         date: { $gte: from, $lte: to },
         topicId: { $exists: true },
       })
@@ -87,9 +99,13 @@ export const getReviewSummary = async (
     return result.length ? result[0]["topics"] : 0;
   };
 
-  const getAverageRating = async (from: Date, to: Date): Promise<number> => {
+  const getAverageRating = async (
+    feedId: string,
+    from: Date,
+    to: Date
+  ): Promise<number> => {
     const result = await Review.aggregate()
-      .match({ date: { $gte: from, $lte: to } })
+      .match({ feed: feedId, date: { $gte: from, $lte: to } })
       .group({ _id: null, averageRating: { $avg: "$rating" } })
       .exec();
     return result.length ? result[0]["averageRating"] : 0;
@@ -97,10 +113,10 @@ export const getReviewSummary = async (
 
   const [newReviewsCounts, oldReviews, topics, averageRating] =
     await Promise.all([
-      getNewReviewsCounts(from, to),
-      getOldReviewsCount(from),
-      getTopicsCount(from, to),
-      getAverageRating(from, to),
+      getNewReviewsCounts(feedId, from, to),
+      getOldReviewsCount(feedId, from),
+      getTopicsCount(feedId, from, to),
+      getAverageRating(feedId, from, to),
     ]);
 
   return {

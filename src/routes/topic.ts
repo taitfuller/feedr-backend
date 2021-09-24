@@ -5,10 +5,11 @@ import { isValidObjectId } from "mongoose";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const { from, to, platform } = req.query as {
+  const { from, to, platform, feed } = req.query as {
     from: string;
     to: string;
     platform: string | string[];
+    feed: string;
   };
 
   if (!from || !to) {
@@ -38,6 +39,7 @@ router.get("/", async (req, res) => {
   }
 
   const topics = await getTopics(
+    feed,
     fromDate,
     toDate,
     platformArray as ("iOS" | "Android")[]
