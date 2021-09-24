@@ -27,7 +27,6 @@ router.get("/summary", async (req, res) => {
   }
 
   const summary = await getReviewSummary(feed, fromDate, toDate);
-  console.log(summary);
 
   res.status(200).json(summary);
 });
