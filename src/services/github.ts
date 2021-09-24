@@ -1,5 +1,18 @@
 import superagent from "superagent";
 
+export const getRepositories = async (token: string): Promise<string[]> => {
+  try {
+    const response = await superagent
+      .get(`https://api.github.com/user/repos`)
+      .set("Authorization", `token ${token}`)
+      .set("User-Agent", "FEEDR")
+      .send();
+    return response.body.map((repo: { name: string }) => repo.name);
+  } catch (error) {
+    return error.status;
+  }
+};
+
 export const createIssue = async (
   token: string,
   owner: string,

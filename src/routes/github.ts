@@ -1,8 +1,19 @@
 import { Router } from "express";
 import { getAccessToken } from "../services/user";
-import { createIssue } from "../services/github";
+import { createIssue, getRepositories } from "../services/github";
 
 const router = Router();
+
+router.get("/repositories", async (req, res) => {
+  const token = await getAccessToken(req.user.sub);
+
+  if (!token) return res.status(401).send("Unauthorized");
+
+  const repositories = await getRepositories(token);
+
+  console.log(repositories);
+  res.json(repositories);
+});
 
 router.post("/issue", async (req, res) => {
   const { owner, repo, title, body } = req.body;
