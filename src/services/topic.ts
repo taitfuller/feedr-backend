@@ -34,17 +34,22 @@ export type TopicSummary = {
 };
 
 export const getSummaryByTopic = async (
+  feed: string,
   from: Date,
   to: Date,
   platforms: string[]
 ): Promise<Map<string, TopicSummary>> => {
+  const feedId = new ObjectId(feed);
+
   const getNewReviews = async (
+    feedId: ObjectId,
     from: Date,
     to: Date
   ): Promise<Map<string, number>> => {
     const result: { _id: ObjectId; newReviews: number }[] =
       await Review.aggregate()
         .match({
+          feed: feedId,
           date: { $gte: from, $lte: to },
           topicId: { $exists: true },
           platform: { $in: platforms },
@@ -58,10 +63,14 @@ export const getSummaryByTopic = async (
     );
   };
 
-  const getOldReviews = async (from: Date): Promise<Map<string, number>> => {
+  const getOldReviews = async (
+    feedId: ObjectId,
+    from: Date
+  ): Promise<Map<string, number>> => {
     const result: { _id: ObjectId; oldReviews: number }[] =
       await Review.aggregate()
         .match({
+          feed: feedId,
           date: { $lt: from },
           topicId: { $exists: true },
           platform: { $in: platforms },
@@ -76,12 +85,14 @@ export const getSummaryByTopic = async (
   };
 
   const getAverageRatings = async (
+    feedId: ObjectId,
     from: Date,
     to: Date
   ): Promise<Map<string, number>> => {
     const result: { _id: ObjectId; averageRating: number }[] =
       await Review.aggregate()
         .match({
+          feed: feedId,
           date: { $gte: from, $lte: to },
           topicId: { $exists: true },
           platform: { $in: platforms },
@@ -96,9 +107,9 @@ export const getSummaryByTopic = async (
   };
 
   const [newByTopic, oldByTopic, averageByTopic] = await Promise.all([
-    getNewReviews(from, to),
-    getOldReviews(from),
-    getAverageRatings(from, to),
+    getNewReviews(feedId, from, to),
+    getOldReviews(feedId, from),
+    getAverageRatings(feedId, from, to),
   ]);
 
   const summaryByTopic = new Map<string, TopicSummary>();
