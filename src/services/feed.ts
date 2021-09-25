@@ -46,22 +46,30 @@ export const createFeed = async (
   const topicsColl = await db.collection<Omit<ITopic, "reviews">>("topics");
   const reviewsColl = await db.collection<IReview>("reviews");
 
-  for (const topic of app.topics) {
+  await topicsColl.insertMany(
+    app.topics.map((topic) => ({ ...topic, feed: feed._id }))
+  );
+
+  const promises: Promise<unknown>[] = app.topics.map(async (topic) => {
     const { insertedId: topicId } = await topicsColl.insertOne({
       feed: feed._id,
       keywords: topic.keywords,
       summary: topic.summary,
       type: topic.type,
     });
+    await reviewsColl.insertMany(
+      topic.reviews.map((review) => ({ ...review, feed: feed._id, topicId }))
+    );
+  });
 
-    for (const review of topic.reviews) {
-      await reviewsColl.insertOne({ ...review, feed: feed._id, topicId });
-    }
-  }
+  promises.push(
+    (async () =>
+      reviewsColl.insertMany(
+        app.otherReviews.map((review) => ({ ...review, feed: feed._id }))
+      ))()
+  );
 
-  for (const review of app.otherReviews) {
-    await reviewsColl.insertOne({ ...review, feed: feed._id });
-  }
+  await Promise.all(promises);
 
   return feed._id.toString();
 };

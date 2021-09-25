@@ -33,6 +33,7 @@ export const getReviewSummary = async (
   averageRating: number;
 }> => {
   const feedId = new ObjectId(feed);
+
   const getNewReviewsCounts = async (
     feedId: ObjectId,
     from: Date,

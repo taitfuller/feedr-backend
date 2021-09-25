@@ -34,54 +34,77 @@ afterAll(async () => {
 
 const mockReviews = [
   {
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 13),
     platform: "iOS",
     rating: 5,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 16),
     platform: "Android",
     rating: 1,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3c"),
   },
   {
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 17),
     platform: "iOS",
     rating: 3,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 11),
     platform: "Android",
     rating: 4,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
   },
   {
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 9),
     platform: "iOS",
     rating: 3,
     topicId: new ObjectId("613c4a58b9e08b7a26724f3b"),
+  },
+  {
+    feed: new ObjectId("614d3961fc9e3d5748ddd429"),
+    date: new Date(2021, 8, 9),
+    platform: "iOS",
+    rating: 3,
+    text: "A review in a different feed",
+    topicId: new ObjectId("613c4a58b9e08b7a26724f3f"),
   },
 ] as unknown as IReview[];
 
 const mockTopics = [
   {
     _id: new ObjectId("613c4a58b9e08b7a26724f3b"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     keywords: ["cool", "birthday"],
     summary: "A really cool day to have a birthday",
     type: "featureRequest",
   },
   {
     _id: new ObjectId("613c4a58b9e08b7a26724f3c"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     keywords: ["awesome", "birthday"],
     summary: "An awesome day to have a birthday",
     type: "featureRequest",
   },
   {
     _id: new ObjectId("613c4a58b9e08b7a26724f3d"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     keywords: ["terrible", "birthday"],
     summary: "A terrible day to have a birthday",
+    type: "bugReport",
+  },
+  {
+    _id: new ObjectId("613c4a58b9e08b7a26724f3e"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd429"),
+    keywords: ["terrible", "birthday"],
+    summary: "A topic in a different feed",
     type: "bugReport",
   },
 ] as ITopic[];
@@ -93,7 +116,7 @@ describe("services/topic.ts", () => {
       await topicColl.insertMany(mockTopics);
 
       const topics = await getTopics(
-        "",
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 8, 16),
         ["iOS", "Android"]
@@ -109,7 +132,7 @@ describe("services/topic.ts", () => {
       await topicColl.insertMany(mockTopics);
 
       const topics = await getTopics(
-        "",
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 8, 16),
         ["iOS", "Android"]
@@ -125,7 +148,7 @@ describe("services/topic.ts", () => {
       await topicColl.insertMany(mockTopics);
 
       const topics = await getTopics(
-        "",
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8, 11),
         new Date(2021, 8, 16),
         ["iOS", "Android"]
@@ -140,9 +163,12 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics("", new Date(2021, 8), new Date(2021, 9), [
-        "iOS",
-      ]);
+      const topics = await getTopics(
+        "614d3961fc9e3d5748ddd428",
+        new Date(2021, 8),
+        new Date(2021, 9),
+        ["iOS"]
+      );
 
       expect(topics).toHaveLength(2);
       expect(topics[0].reviews).toHaveLength(3);
@@ -153,9 +179,12 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics("", new Date(2021, 8), new Date(2021, 9), [
-        "Android",
-      ]);
+      const topics = await getTopics(
+        "614d3961fc9e3d5748ddd428",
+        new Date(2021, 8),
+        new Date(2021, 9),
+        ["Android"]
+      );
 
       expect(topics).toHaveLength(2);
       expect(topics[0].reviews).toHaveLength(1);
@@ -166,10 +195,12 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
       await topicColl.insertMany(mockTopics);
 
-      const topics = await getTopics("", new Date(2021, 8), new Date(2021, 9), [
-        "iOS",
-        "Android",
-      ]);
+      const topics = await getTopics(
+        "614d3961fc9e3d5748ddd428",
+        new Date(2021, 8),
+        new Date(2021, 9),
+        ["iOS", "Android"]
+      );
 
       expect(topics).toHaveLength(2);
       expect(topics[0].reviews).toHaveLength(3);
@@ -202,7 +233,7 @@ describe("services/topic.ts", () => {
     it("Returns null if no topic found with specified id", async () => {
       await topicColl.insertMany(mockTopics);
 
-      const topic = await getTopic("613c4a58b9e08b7a26724f3e");
+      const topic = await getTopic("613c4a58b9e08b7a26724f3f");
 
       expect(topic).toBeNull();
     });
@@ -213,6 +244,7 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
 
       const summaryByTopic = await getSummaryByTopic(
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8, 10),
         new Date(2021, 8, 16),
         ["iOS", "Android"]
@@ -243,6 +275,7 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
 
       const summaryByTopic = await getSummaryByTopic(
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 9),
         ["iOS"]
@@ -265,6 +298,7 @@ describe("services/topic.ts", () => {
       await reviewColl.insertMany(mockReviews);
 
       const summaryByTopic = await getSummaryByTopic(
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 9),
         ["Android"]
@@ -293,6 +327,7 @@ describe("services/topic.ts", () => {
 
     it("Returns empty map if no matching reviews", async () => {
       const summaryByTopic = await getSummaryByTopic(
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 9),
         ["iOS", "Android"]
@@ -303,6 +338,7 @@ describe("services/topic.ts", () => {
 
     it("Returns zeros for no matching new reviews", async () => {
       await reviewColl.insertOne({
+        feed: new ObjectId("614d3961fc9e3d5748ddd428"),
         date: new Date(2021, 7, 9),
         platform: "iOS",
         rating: 3,
@@ -310,6 +346,7 @@ describe("services/topic.ts", () => {
       } as unknown as IReview);
 
       const summaryByTopic = await getSummaryByTopic(
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 9),
         ["iOS", "Android"]
@@ -331,6 +368,7 @@ describe("services/topic.ts", () => {
       await reviewColl.insertOne(mockReviews[0]);
 
       const summaryByTopic = await getSummaryByTopic(
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 9),
         ["iOS", "Android"]
