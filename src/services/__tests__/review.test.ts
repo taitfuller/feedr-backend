@@ -32,6 +32,7 @@ afterAll(async () => {
 const mockReviews = [
   {
     _id: new ObjectId("613c4a59b9e08b7a26724f57"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 13),
     platform: "iOS",
     type: "featureRequest",
@@ -42,6 +43,7 @@ const mockReviews = [
   },
   {
     _id: new ObjectId("613c4a59b9e08b7a26724f58"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 16),
     platform: "Android",
     type: "featureRequest",
@@ -52,6 +54,7 @@ const mockReviews = [
   },
   {
     _id: new ObjectId("613c4a59b9e08b7a26724f59"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 17),
     platform: "iOS",
     type: "bugReport",
@@ -62,6 +65,7 @@ const mockReviews = [
   },
   {
     _id: new ObjectId("613c4a59b9e08b7a26724f60"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 8, 14),
     platform: "Android",
     type: "other",
@@ -71,6 +75,7 @@ const mockReviews = [
   },
   {
     _id: new ObjectId("613c4a59b9e08b7a26724f61"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 7, 28),
     platform: "iOS",
     type: "bugReport",
@@ -81,11 +86,22 @@ const mockReviews = [
   },
   {
     _id: new ObjectId("613c4a59b9e08b7a26724f62"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd428"),
     date: new Date(2021, 4, 28),
     platform: "Android",
     type: "other",
     rating: 3,
     text: "An earlier day to have a birthday",
+    flag: false,
+  },
+  {
+    _id: new ObjectId("613c4a59b9e08b7a26724f63"),
+    feed: new ObjectId("614d3961fc9e3d5748ddd429"),
+    date: new Date(2021, 4, 28),
+    platform: "Android",
+    type: "other",
+    rating: 3,
+    text: "A review in a different feed",
     flag: false,
   },
 ] as unknown as IReview[];
@@ -143,7 +159,7 @@ describe("services/review.ts", () => {
     it("Returns null if no review found with specified id", async () => {
       await reviewColl.insertMany(mockReviews);
 
-      const review = await setFlag("613c4a59b9e08b7a26724f63");
+      const review = await setFlag("613c4a59b9e08b7a26724f70");
       expect(review).toBeNull();
     });
   });
@@ -164,7 +180,7 @@ describe("services/review.ts", () => {
     it("Returns null if no review found with specified id", async () => {
       await reviewColl.insertMany(mockReviews);
 
-      const review = await removeTopic("613c4a59b9e08b7a26724f63");
+      const review = await removeTopic("613c4a59b9e08b7a26724f70");
       expect(review).toBeNull();
     });
   });
@@ -174,7 +190,7 @@ describe("services/review.ts", () => {
       await reviewColl.insertMany(mockReviews);
 
       const summary = await getReviewSummary(
-        "",
+        "614d3961fc9e3d5748ddd428",
         new Date(2021, 8),
         new Date(2021, 9)
       );
@@ -189,7 +205,7 @@ describe("services/review.ts", () => {
 
     it("Returns zeros if no matching reviews", async () => {
       const summary = await getReviewSummary(
-        "",
+        "614d3961fc9e3d5748ddd428",
         new Date(1970),
         new Date(2021, 8, 11)
       );
