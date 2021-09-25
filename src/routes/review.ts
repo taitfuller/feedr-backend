@@ -11,10 +11,11 @@ router.get("/summary", async (req, res) => {
     feed: string;
   };
 
-  if (!from || !to) {
-    res.status(400).send("`from` and `to` are required");
-    return;
-  }
+  if (!feed) return res.status(400).send("`feed` is required");
+  if (!isValidObjectId(feed))
+    return res.status(400).send("Invalid ID format for `feed`");
+
+  if (!from || !to) return res.status(400).send("`from` and `to` are required");
 
   const fromDate = new Date(from);
   const toDate = new Date(to);
@@ -22,8 +23,7 @@ router.get("/summary", async (req, res) => {
     fromDate.toString() === "Invalid Date" ||
     toDate.toString() === "Invalid Date"
   ) {
-    res.status(400).send("Invalid date format");
-    return;
+    return res.status(400).send("Invalid date format");
   }
 
   const summary = await getReviewSummary(feed, fromDate, toDate);
@@ -50,8 +50,7 @@ router.patch("/:id/flag", async (req, res) => {
   try {
     review = await setFlag(id, flag);
   } catch (error) {
-    res.status(400).send("Validation error");
-    return;
+    return res.status(400).send("Validation error");
   }
 
   if (review) {
@@ -69,8 +68,7 @@ router.patch("/:id/remove-topic", async (req, res, next) => {
   try {
     review = await removeTopic(id);
   } catch (error) {
-    next(error);
-    return;
+    return next(error);
   }
 
   if (review) {

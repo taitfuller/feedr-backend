@@ -22,7 +22,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 200 and topics", async () => {
       await request(app)
         .get(
-          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android"
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
         )
         .set("Authorization", `Bearer ${token}`)
         .expect(200, [
@@ -86,12 +86,14 @@ describe("routes/topic.ts", () => {
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(1);
       expect(mockedGetTopics).toHaveBeenCalledWith(
+        "614d3961fc9e3d5748ddd428",
         new Date("2021-08-01"),
         new Date("2021-08-29"),
         ["iOS", "Android"]
       );
       expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(1);
       expect(mockedGetSummaryByTopic).toHaveBeenCalledWith(
+        "614d3961fc9e3d5748ddd428",
         new Date("2021-08-01"),
         new Date("2021-08-29"),
         ["iOS", "Android"]
@@ -103,7 +105,7 @@ describe("routes/topic.ts", () => {
 
       await request(app)
         .get(
-          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android"
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
         )
         .set("Authorization", `Bearer ${token}`)
         .expect(200, [
@@ -167,22 +169,36 @@ describe("routes/topic.ts", () => {
 
       expect(mockedGetTopics).toHaveBeenCalledTimes(1);
       expect(mockedGetTopics).toHaveBeenCalledWith(
+        "614d3961fc9e3d5748ddd428",
         new Date("2021-08-01"),
         new Date("2021-08-29"),
         ["iOS", "Android"]
       );
       expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(1);
       expect(mockedGetSummaryByTopic).toHaveBeenCalledWith(
+        "614d3961fc9e3d5748ddd428",
         new Date("2021-08-01"),
         new Date("2021-08-29"),
         ["iOS", "Android"]
       );
     });
 
+    it("Returns status 400 if feed has invalid format", async () => {
+      await request(app)
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android&feed=feed.me"
+        )
+        .set("Authorization", `Bearer ${token}`)
+        .expect(400, "Invalid ID format for `feed`");
+
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
+
     it("Returns status 400 if from has invalid format", async () => {
       await request(app)
         .get(
-          "/api/topic?from=invalid-date&to=2021-08-29&platform=iOS&platform=Android"
+          "/api/topic?from=invalid-date&to=2021-08-29&platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
         )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
@@ -194,7 +210,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if to has invalid format", async () => {
       await request(app)
         .get(
-          "/api/topic?from=2021-08-01&to=invalid_date&platform=iOS&platform=Android"
+          "/api/topic?from=2021-08-01&to=invalid_date&platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
         )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
@@ -206,7 +222,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if from and to has invalid format", async () => {
       await request(app)
         .get(
-          "/api/topic?from=invalid_date&to=invalid_date&platform=iOS&platform=Android"
+          "/api/topic?from=invalid_date&to=invalid_date&platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
         )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
@@ -215,9 +231,23 @@ describe("routes/topic.ts", () => {
       expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
     });
 
+    it("Returns status 400 if feed is not provided", async () => {
+      await request(app)
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=iOS&platform=Android"
+        )
+        .set("Authorization", `Bearer ${token}`)
+        .expect(400, "`feed` is required");
+
+      expect(mockedGetTopics).toHaveBeenCalledTimes(0);
+      expect(mockedGetSummaryByTopic).toHaveBeenCalledTimes(0);
+    });
+
     it("Returns status 400 if from is not provided", async () => {
       await request(app)
-        .get("/api/topic?to=2021-08-29&platform=iOS&platform=Android")
+        .get(
+          "/api/topic?to=2021-08-29&platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "`from` and `to` are required");
 
@@ -227,7 +257,9 @@ describe("routes/topic.ts", () => {
 
     it("Returns status 400 if to is not provided", async () => {
       await request(app)
-        .get("/api/topic?from=2021-08-01&platform=iOS&platform=Android")
+        .get(
+          "/api/topic?from=2021-08-01&platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "`from` and `to` are required");
 
@@ -237,7 +269,9 @@ describe("routes/topic.ts", () => {
 
     it("Returns status 400 if from and to are not provided", async () => {
       await request(app)
-        .get("/api/topic?platform=iOS&platform=Android")
+        .get(
+          "/api/topic?platform=iOS&platform=Android&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "`from` and `to` are required");
 
@@ -247,7 +281,9 @@ describe("routes/topic.ts", () => {
 
     it("Returns status 400 if platform is not provided", async () => {
       await request(app)
-        .get("/api/topic?from=2021-08-01&to=2021-08-29")
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "`platform` is required");
 
@@ -257,7 +293,9 @@ describe("routes/topic.ts", () => {
 
     it("Returns status 400 if platform is provided single invalid value", async () => {
       await request(app)
-        .get("/api/topic?from=2021-08-01&to=2021-08-29&platform=ios")
+        .get(
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "`platform` is invalid");
 
@@ -268,7 +306,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if platform is provided multiple invalid values", async () => {
       await request(app)
         .get(
-          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android"
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android&feed=614d3961fc9e3d5748ddd428"
         )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "`platform` is invalid");
@@ -280,7 +318,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if no token provided", async () => {
       await request(app)
         .get(
-          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android"
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android&feed=614d3961fc9e3d5748ddd428"
         )
         .expect(401, "No authorization token was found");
 
@@ -291,7 +329,7 @@ describe("routes/topic.ts", () => {
     it("Returns status 400 if invalid token provided", async () => {
       await request(app)
         .get(
-          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android"
+          "/api/topic?from=2021-08-01&to=2021-08-29&platform=ios&platform=android&feed=614d3961fc9e3d5748ddd428"
         )
         .set("Authorization", `Bearer let.me.in`)
         .expect(401, "invalid token");

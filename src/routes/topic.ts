@@ -12,10 +12,11 @@ router.get("/", async (req, res) => {
     feed: string;
   };
 
-  if (!from || !to) {
-    res.status(400).send("`from` and `to` are required");
-    return;
-  }
+  if (!feed) return res.status(400).send("`feed` is required");
+  if (!isValidObjectId(feed))
+    return res.status(400).send("Invalid ID format for `feed`");
+
+  if (!from || !to) return res.status(400).send("`from` and `to` are required");
 
   const fromDate = new Date(from);
   const toDate = new Date(to);
@@ -23,19 +24,16 @@ router.get("/", async (req, res) => {
     fromDate.toString() === "Invalid Date" ||
     toDate.toString() === "Invalid Date"
   ) {
-    res.status(400).send("Invalid date format");
-    return;
+    return res.status(400).send("Invalid date format");
   }
 
   if (!platform) {
-    res.status(400).send("`platform` is required");
-    return;
+    return res.status(400).send("`platform` is required");
   }
   const platformArray = Array.isArray(platform) ? platform : [platform];
   const validPlatforms = new Set(["iOS", "Android"]);
   if (platformArray.some((platform) => !validPlatforms.has(platform))) {
-    res.status(400).send("`platform` is invalid");
-    return;
+    return res.status(400).send("`platform` is invalid");
   }
 
   const topics = await getTopics(
@@ -46,6 +44,7 @@ router.get("/", async (req, res) => {
   );
 
   const summaryByTopic = await getSummaryByTopic(
+    feed,
     fromDate,
     toDate,
     platformArray

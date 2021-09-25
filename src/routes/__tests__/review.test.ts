@@ -178,7 +178,9 @@ describe("routes/review.ts", () => {
   describe("GET /api/review/summary", () => {
     it("Returns status 200 and summary", async () => {
       await request(app)
-        .get("/api/review/summary?from=2021-08-01&to=2021-08-29")
+        .get(
+          "/api/review/summary?from=2021-08-01&to=2021-08-29&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(200, {
           featureRequests: 13,
@@ -191,14 +193,26 @@ describe("routes/review.ts", () => {
 
       expect(mockedGetReviewSummary).toHaveBeenCalledTimes(1);
       expect(mockedGetReviewSummary).toHaveBeenCalledWith(
+        "614d3961fc9e3d5748ddd428",
         new Date("2021-08-01"),
         new Date("2021-08-29")
       );
     });
 
+    it("Returns status 400 if feed has invalid format", async () => {
+      await request(app)
+        .get("/api/review/summary?from=2021-08-01&to=2021-08-29&feed=feed.me")
+        .set("Authorization", `Bearer ${token}`)
+        .expect(400, "Invalid ID format for `feed`");
+
+      expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
+    });
+
     it("Returns status 400 if from has invalid format", async () => {
       await request(app)
-        .get("/api/review/summary?from=invalid-date&to=2021-08-29")
+        .get(
+          "/api/review/summary?from=invalid-date&to=2021-08-29&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
 
@@ -207,7 +221,9 @@ describe("routes/review.ts", () => {
 
     it("Returns status 400 if to has invalid format", async () => {
       await request(app)
-        .get("/api/review/summary?from=2021-08-01&to=invalid_date")
+        .get(
+          "/api/review/summary?from=2021-08-01&to=invalid_date&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
 
@@ -216,17 +232,27 @@ describe("routes/review.ts", () => {
 
     it("Returns status 400 if from and to has invalid format", async () => {
       await request(app)
-        .get("/api/review/summary?from=invalid_date&to=invalid_date")
+        .get(
+          "/api/review/summary?from=invalid_date&to=invalid_date&feed=614d3961fc9e3d5748ddd428"
+        )
         .set("Authorization", `Bearer ${token}`)
         .expect(400, "Invalid date format");
 
       expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
     });
   });
+  it("Returns status 400 if feed is not provided", async () => {
+    await request(app)
+      .get("/api/review/summary?from=2021-08-01&to=2021-08-29")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(400, "`feed` is required");
+
+    expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
+  });
 
   it("Returns status 400 if from is not provided", async () => {
     await request(app)
-      .get("/api/review/summary?to=2021-08-29")
+      .get("/api/review/summary?to=2021-08-29&feed=614d3961fc9e3d5748ddd428")
       .set("Authorization", `Bearer ${token}`)
       .expect(400, "`from` and `to` are required");
 
@@ -235,7 +261,7 @@ describe("routes/review.ts", () => {
 
   it("Returns status 400 if to is not provided", async () => {
     await request(app)
-      .get("/api/review/summary?from=2021-08-01")
+      .get("/api/review/summary?from=2021-08-01&feed=614d3961fc9e3d5748ddd428")
       .set("Authorization", `Bearer ${token}`)
       .expect(400, "`from` and `to` are required");
 
@@ -244,7 +270,7 @@ describe("routes/review.ts", () => {
 
   it("Returns status 400 if from and to are not provided", async () => {
     await request(app)
-      .get("/api/review/summary")
+      .get("/api/review/summary?feed=614d3961fc9e3d5748ddd428")
       .set("Authorization", `Bearer ${token}`)
       .expect(400, "`from` and `to` are required");
 
@@ -253,7 +279,9 @@ describe("routes/review.ts", () => {
 
   it("Returns status 401 if no token provided", async () => {
     await request(app)
-      .get("/api/review/summary")
+      .get(
+        "/api/review/summary?from=2021-08-01&to=2021-08-29&feed=614d3961fc9e3d5748ddd428"
+      )
       .expect(401, "No authorization token was found");
 
     expect(mockedGetReviewSummary).toHaveBeenCalledTimes(0);
@@ -261,7 +289,9 @@ describe("routes/review.ts", () => {
 
   it("Returns status 401 if invalid token provided", async () => {
     await request(app)
-      .get("/api/review/summary")
+      .get(
+        "/api/review/summary?from=2021-08-01&to=2021-08-29&feed=614d3961fc9e3d5748ddd428"
+      )
       .set("Authorization", `Bearer let.me.in`)
       .expect(401, "invalid token");
 
